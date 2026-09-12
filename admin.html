@@ -55,6 +55,7 @@
       background: rgba(255,255,255,0.07);
       color: white;
       outline: none;
+      font-size: 16px;
     }
 
     button {
@@ -63,10 +64,17 @@
       padding: 11px 16px;
       cursor: pointer;
       margin-top: 8px;
+      font-size: 16px;
     }
 
     .login-btn {
       width: 100%;
+      background: #ffffff;
+      color: #111111;
+    }
+
+    .login-btn:active {
+      transform: scale(0.99);
     }
 
     .logout-btn {
@@ -115,7 +123,12 @@
     }
 
     .hidden {
-      display: none;
+      display: none !important;
+    }
+
+    #loginStatus {
+      margin-top: 12px;
+      color: #ffaaaa;
     }
 
     #status {
@@ -161,6 +174,7 @@
 
       <button
         id="loginBtn"
+        type="button"
         class="login-btn"
       >
         Log in
@@ -182,6 +196,7 @@
 
         <button
           id="logoutBtn"
+          type="button"
           class="logout-btn"
         >
           Log out
@@ -195,7 +210,6 @@
 
       </div>
 
-
       <div id="letters"></div>
 
     </section>
@@ -203,363 +217,467 @@
   </main>
 
 
-  <!-- Supabase -->
+  <!-- SUPABASE -->
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <script src="config.js"></script>
 
 
   <script>
 
-    const config =
-      window.STARLETTERS_CONFIG || {};
+    document.addEventListener(
+      "DOMContentLoaded",
+      async function () {
 
-    const supabase =
-      window.supabase.createClient(
-        config.SUPABASE_URL,
-        config.SUPABASE_PUBLISHABLE_KEY
-      );
+        const loginPanel =
+          document.getElementById(
+            "loginPanel"
+          );
 
+        const adminPanel =
+          document.getElementById(
+            "adminPanel"
+          );
 
-    const loginPanel =
-      document.getElementById("loginPanel");
+        const loginBtn =
+          document.getElementById(
+            "loginBtn"
+          );
 
-    const adminPanel =
-      document.getElementById("adminPanel");
+        const logoutBtn =
+          document.getElementById(
+            "logoutBtn"
+          );
 
-    const loginBtn =
-      document.getElementById("loginBtn");
+        const email =
+          document.getElementById(
+            "email"
+          );
 
-    const logoutBtn =
-      document.getElementById("logoutBtn");
+        const password =
+          document.getElementById(
+            "password"
+          );
 
-    const email =
-      document.getElementById("email");
+        const loginStatus =
+          document.getElementById(
+            "loginStatus"
+          );
 
-    const password =
-      document.getElementById("password");
+        const letters =
+          document.getElementById(
+            "letters"
+          );
 
-    const loginStatus =
-      document.getElementById("loginStatus");
-
-    const letters =
-      document.getElementById("letters");
-
-    const status =
-      document.getElementById("status");
-
-
-    async function checkOwner() {
-
-      const {
-        data: {
-          user
-        }
-      } = await supabase.auth.getUser();
-
-
-      if (!user) {
-
-        loginPanel.classList.remove(
-          "hidden"
-        );
-
-        adminPanel.classList.add(
-          "hidden"
-        );
-
-        return;
-
-      }
+        const status =
+          document.getElementById(
+            "status"
+          );
 
 
-      loginPanel.classList.add(
-        "hidden"
-      );
+        /* CHECK SUPABASE */
 
-      adminPanel.classList.remove(
-        "hidden"
-      );
-
-      loadLetters();
-
-    }
-
-
-    loginBtn.addEventListener(
-      "click",
-      async () => {
-
-        loginStatus.textContent =
-          "Logging in...";
-
-
-        const {
-          error
-        } =
-          await supabase.auth.signInWithPassword({
-
-            email:
-              email.value.trim(),
-
-            password:
-              password.value
-
-          });
-
-
-        if (error) {
+        if (
+          !window.supabase ||
+          !window.STARLETTERS_CONFIG
+        ) {
 
           loginStatus.textContent =
-            error.message;
+            "Supabase could not load. Please refresh the page.";
 
           return;
 
         }
 
 
-        loginStatus.textContent =
-          "";
-
-        checkOwner();
-
-      }
-    );
+        const config =
+          window.STARLETTERS_CONFIG;
 
 
-    logoutBtn.addEventListener(
-      "click",
-      async () => {
+        if (
+          !config.SUPABASE_URL ||
+          !config.SUPABASE_PUBLISHABLE_KEY
+        ) {
 
-        await supabase.auth.signOut();
+          loginStatus.textContent =
+            "Supabase configuration is missing.";
 
-        checkOwner();
+          return;
 
-      }
-    );
-
-
-    async function loadLetters() {
-
-      status.textContent =
-        "Loading letters...";
+        }
 
 
-      const {
-        data,
-        error
-      } =
-        await supabase
-          .from("letters")
-          .select("*")
-          .order(
-            "created_at",
-            {
-              ascending: false
-            }
+        const supabase =
+          window.supabase.createClient(
+            config.SUPABASE_URL,
+            config.SUPABASE_PUBLISHABLE_KEY
           );
 
 
-      if (error) {
+        /* CHECK LOGIN */
 
-        status.textContent =
-          "Unable to load letters: " +
-          error.message;
+        async function checkOwner() {
 
-        return;
-
-      }
-
-
-      letters.innerHTML = "";
+          const {
+            data,
+            error
+          } =
+            await supabase.auth.getUser();
 
 
-      if (!data || data.length === 0) {
+          if (
+            error ||
+            !data ||
+            !data.user
+          ) {
 
-        status.textContent =
-          "No letters yet.";
-
-        return;
-
-      }
-
-
-      status.textContent =
-        `${data.length} letter(s)`;
-
-
-      data.forEach(
-        (letter) => {
-
-          const card =
-            document.createElement(
-              "article"
+            loginPanel.classList.remove(
+              "hidden"
             );
 
-          card.className =
-            "letter";
+            adminPanel.classList.add(
+              "hidden"
+            );
+
+            return;
+
+          }
 
 
-          const date =
-            letter.created_at
-              ? new Date(
-                  letter.created_at
-                ).toLocaleString()
-              : "";
+          loginPanel.classList.add(
+            "hidden"
+          );
+
+          adminPanel.classList.remove(
+            "hidden"
+          );
+
+          await loadLetters();
+
+        }
 
 
-          card.innerHTML = `
+        /* LOGIN */
 
-            <div class="letter-header">
+        loginBtn.addEventListener(
+          "click",
+          async function () {
 
-              <div>
+            loginStatus.textContent =
+              "Logging in...";
 
-                <div class="recipient">
-                  To: ${escapeHtml(
-                    letter.to_name
-                  )}
-                </div>
+            loginBtn.disabled =
+              true;
 
-                <div class="date">
-                  ${escapeHtml(date)}
-                </div>
 
-              </div>
+            const {
+              data,
+              error
+            } =
+              await supabase.auth
+                .signInWithPassword({
 
-              <button
-                class="delete-btn"
-                data-id="${letter.id}"
-              >
-                Delete
-              </button>
+                  email:
+                    email.value.trim(),
 
-            </div>
+                  password:
+                    password.value
 
-            <div class="message">
-              ${escapeHtml(
-                letter.message
-              )}
-            </div>
+                });
 
-            ${
-              letter.from_name
-                ? `
-                  <div class="from">
-                    From:
-                    ${escapeHtml(
-                      letter.from_name
-                    )}
+
+            loginBtn.disabled =
+              false;
+
+
+            if (error) {
+
+              loginStatus.textContent =
+                error.message;
+
+              return;
+
+            }
+
+
+            loginStatus.textContent =
+              "";
+
+            await checkOwner();
+
+          }
+        );
+
+
+        /* LOGOUT */
+
+        logoutBtn.addEventListener(
+          "click",
+          async function () {
+
+            await supabase.auth.signOut();
+
+            checkOwner();
+
+          }
+        );
+
+
+        /* LOAD LETTERS */
+
+        async function loadLetters() {
+
+          status.textContent =
+            "Loading letters...";
+
+
+          const {
+            data,
+            error
+          } =
+            await supabase
+              .from("letters")
+              .select("*")
+              .order(
+                "created_at",
+                {
+                  ascending: false
+                }
+              );
+
+
+          if (error) {
+
+            status.textContent =
+              "Unable to load letters: " +
+              error.message;
+
+            return;
+
+          }
+
+
+          letters.innerHTML = "";
+
+
+          if (
+            !data ||
+            data.length === 0
+          ) {
+
+            status.textContent =
+              "No letters yet.";
+
+            return;
+
+          }
+
+
+          status.textContent =
+            `${data.length} letter(s)`;
+
+
+          data.forEach(
+            function (letter) {
+
+              const card =
+                document.createElement(
+                  "article"
+                );
+
+              card.className =
+                "letter";
+
+
+              const date =
+                letter.created_at
+                  ? new Date(
+                      letter.created_at
+                    ).toLocaleString()
+                  : "";
+
+
+              const recipient =
+                escapeHtml(
+                  letter.to_name
+                );
+
+              const message =
+                escapeHtml(
+                  letter.message
+                );
+
+              const from =
+                escapeHtml(
+                  letter.from_name
+                );
+
+
+              card.innerHTML = `
+
+                <div class="letter-header">
+
+                  <div>
+
+                    <div class="recipient">
+                      To: ${recipient}
+                    </div>
+
+                    <div class="date">
+                      ${escapeHtml(date)}
+                    </div>
+
                   </div>
-                `
-                : ""
+
+                  <button
+                    type="button"
+                    class="delete-btn"
+                  >
+                    Delete
+                  </button>
+
+                </div>
+
+                <div class="message">
+                  ${message}
+                </div>
+
+                ${
+                  letter.from_name
+                    ? `
+                      <div class="from">
+                        From: ${from}
+                      </div>
+                    `
+                    : ""
+                }
+
+              `;
+
+
+              const deleteBtn =
+                card.querySelector(
+                  ".delete-btn"
+                );
+
+
+              deleteBtn.addEventListener(
+                "click",
+                function () {
+
+                  deleteLetter(
+                    letter.id
+                  );
+
+                }
+              );
+
+
+              letters.appendChild(
+                card
+              );
+
             }
-
-          `;
-
-
-          const deleteBtn =
-            card.querySelector(
-              ".delete-btn"
-            );
-
-
-          deleteBtn.addEventListener(
-            "click",
-            () => deleteLetter(
-              letter.id
-            )
-          );
-
-
-          letters.appendChild(
-            card
           );
 
         }
-      );
-
-    }
 
 
-    async function deleteLetter(id) {
+        /* DELETE */
 
-      const confirmed =
-        confirm(
-          "Delete this letter permanently?"
+        async function deleteLetter(
+          id
+        ) {
+
+          const confirmed =
+            window.confirm(
+              "Delete this letter permanently?"
+            );
+
+
+          if (!confirmed) {
+            return;
+          }
+
+
+          const {
+            error
+          } =
+            await supabase
+              .from("letters")
+              .delete()
+              .eq(
+                "id",
+                id
+              );
+
+
+          if (error) {
+
+            window.alert(
+              "Delete failed: " +
+              error.message
+            );
+
+            return;
+
+          }
+
+
+          await loadLetters();
+
+        }
+
+
+        /* ESCAPE HTML */
+
+        function escapeHtml(
+          value
+        ) {
+
+          return String(
+            value ?? ""
+          )
+            .replace(
+              /&/g,
+              "&amp;"
+            )
+            .replace(
+              /</g,
+              "&lt;"
+            )
+            .replace(
+              />/g,
+              "&gt;"
+            )
+            .replace(
+              /"/g,
+              "&quot;"
+            )
+            .replace(
+              /'/g,
+              "&#039;"
+            );
+
+        }
+
+
+        /* AUTH CHANGES */
+
+        supabase.auth.onAuthStateChange(
+          function () {
+            checkOwner();
+          }
         );
 
 
-      if (!confirmed) {
-        return;
-      }
+        /* START */
 
+        await checkOwner();
 
-      const {
-        error
-      } =
-        await supabase
-          .from("letters")
-          .delete()
-          .eq(
-            "id",
-            id
-          );
-
-
-      if (error) {
-
-        alert(
-          "Delete failed: " +
-          error.message
-        );
-
-        return;
-
-      }
-
-
-      loadLetters();
-
-    }
-
-
-    function escapeHtml(value) {
-
-      return String(
-        value ?? ""
-      )
-        .replace(
-          /&/g,
-          "&amp;"
-        )
-        .replace(
-          /</g,
-          "&lt;"
-        )
-        .replace(
-          />/g,
-          "&gt;"
-        )
-        .replace(
-          /"/g,
-          "&quot;"
-        )
-        .replace(
-          /'/g,
-          "&#039;"
-        );
-
-    }
-
-
-    supabase.auth.onAuthStateChange(
-      () => {
-        checkOwner();
       }
     );
-
-
-    checkOwner();
 
   </script>
 
