@@ -744,7 +744,6 @@ if (
     true
   );
 }
-      }
 
 
       const submitBtn =
