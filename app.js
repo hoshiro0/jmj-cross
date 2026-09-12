@@ -67,6 +67,21 @@
   const results = $("results");
   const resultsMeta = $("resultsMeta");
 
+  const musicSearch = $("musicSearch");
+  const musicSearchBtn = $("musicSearchBtn");
+  const musicStatus = $("musicStatus");
+  const musicResults = $("musicResults");
+  const selectedMusic = $("selectedMusic");
+
+  const musicTitle = $("musicTitle");
+  const musicArtist = $("musicArtist");
+  const musicArtwork = $("musicArtwork");
+  const musicUrl = $("musicUrl");
+  const musicPreview = $("musicPreview");
+
+const musicFunctionUrl =
+  `${config.SUPABASE_URL}/functions/v1/search-music`;
+
 
   /* =========================
      FATAL ERROR
@@ -291,6 +306,240 @@
      DATE
   ========================== */
 
+// =========================
+// MUSIC SEARCH
+// =========================
+
+async function searchMusic() {
+  const query = musicSearch.value.trim();
+
+  if (!query) {
+    musicStatus.textContent =
+      "Type a song or artist first.";
+    musicResults.innerHTML = "";
+    return;
+  }
+
+  musicSearchBtn.disabled = true;
+  musicSearchBtn.textContent = "Searching…";
+  musicStatus.textContent =
+    "Looking through the music library…";
+  musicResults.innerHTML = "";
+
+  try {
+    const response = await fetch(
+      musicFunctionUrl,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          query: query.slice(0, 100)
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error || "Music search failed."
+      );
+    }
+
+    if (!data.results || !data.results.length) {
+      musicStatus.textContent =
+        "No songs found. Try another search.";
+      return;
+    }
+
+    musicStatus.textContent =
+      `${data.results.length} results found.`;
+
+    renderMusicResults(data.results);
+
+  } catch (error) {
+    console.error(
+      "MUSIC SEARCH ERROR:",
+      error
+    );
+
+    musicStatus.textContent =
+      "Couldn't search for music right now.";
+  }
+
+  musicSearchBtn.disabled = false;
+  musicSearchBtn.textContent = "Search";
+}
+
+function renderMusicResults(tracks) {
+  musicResults.innerHTML = "";
+
+  tracks.forEach((track) => {
+
+    const item =
+      document.createElement("div");
+
+    item.className = "music-result";
+
+    item.innerHTML = `
+      ${
+        track.artwork
+          ? `
+            <img
+              class="music-artwork"
+              src="${escapeHtml(track.artwork)}"
+              alt=""
+              loading="lazy"
+            >
+          `
+          : `
+            <div class="music-artwork"></div>
+          `
+      }
+
+      <div class="music-info">
+
+        <div class="music-title">
+          ${escapeHtml(track.title)}
+        </div>
+
+        <div class="music-artist">
+          ${escapeHtml(track.artist)}
+        </div>
+
+        ${
+          track.album
+            ? `
+              <div class="music-album">
+                ${escapeHtml(track.album)}
+              </div>
+            `
+            : ""
+        }
+
+      </div>
+
+      <button
+        class="music-select"
+        type="button"
+      >
+        Select
+      </button>
+    `;
+
+    item
+      .querySelector(".music-select")
+      .addEventListener(
+        "click",
+        () => selectMusic(track)
+      );
+
+    musicResults.appendChild(item);
+  });
+}
+
+function selectMusic(track) {
+
+  musicTitle.value =
+    track.title || "";
+
+  musicArtist.value =
+    track.artist || "";
+
+  musicArtwork.value =
+    track.artwork || "";
+
+  musicUrl.value =
+    track.url || "";
+
+  musicPreview.value =
+    track.preview || "";
+
+  selectedMusic.innerHTML = `
+    ${
+      track.artwork
+        ? `
+          <img
+            class="music-artwork"
+            src="${escapeHtml(track.artwork)}"
+            alt=""
+          >
+        `
+        : `
+          <div class="music-artwork"></div>
+        `
+    }
+
+    <div class="selected-music-info">
+
+      <div class="selected-label">
+        Selected song
+      </div>
+
+      <div class="music-title">
+        ${escapeHtml(track.title)}
+      </div>
+
+      <div class="music-artist">
+        ${escapeHtml(track.artist)}
+      </div>
+
+    </div>
+
+    <button
+      class="remove-music"
+      type="button"
+    >
+      Remove
+    </button>
+  `;
+
+  selectedMusic.classList.add("show");
+
+  musicResults.innerHTML = "";
+
+  musicStatus.textContent =
+    "Song selected. ✦";
+
+  selectedMusic
+    .querySelector(".remove-music")
+    .addEventListener(
+      "click",
+      clearSelectedMusic
+    );
+}
+
+function clearSelectedMusic() {
+
+  musicTitle.value = "";
+  musicArtist.value = "";
+  musicArtwork.value = "";
+  musicUrl.value = "";
+  musicPreview.value = "";
+
+  selectedMusic.innerHTML = "";
+  selectedMusic.classList.remove("show");
+
+  musicStatus.textContent = "";
+}
+
+musicSearchBtn.addEventListener(
+  "click",
+  searchMusic
+);
+
+musicSearch.addEventListener(
+  "keydown",
+  (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      searchMusic();
+    }
+  }
+);
+  
   function formatDate(value) {
 
     const d = new Date(value);
@@ -333,10 +582,96 @@
       escapeHtml(row.message);
 
 
-    const spotify =
-      row.spotify_url
-        ? spotifyEmbedUrl(row.spotify_url)
-        : null;
+    let musicHtml = "";
+
+if (
+  row.music_title ||
+  row.music_artist ||
+  row.music_preview
+) {
+  musicHtml = `
+    <div class="card-music">
+
+      <div class="card-music-top">
+
+        ${
+          row.music_artwork
+            ? `
+              <img
+                class="card-music-artwork"
+                src="${escapeHtml(row.music_artwork)}"
+                alt=""
+                loading="lazy"
+              >
+            `
+            : ""
+        }
+
+        <div class="card-music-info">
+
+          <div class="card-music-title">
+            ${escapeHtml(
+              row.music_title || "Unknown song"
+            )}
+          </div>
+
+          <div class="card-music-artist">
+            ${escapeHtml(
+              row.music_artist || "Unknown artist"
+            )}
+          </div>
+
+        </div>
+
+        ${
+          row.music_url
+            ? `
+              <a
+                class="card-music-link"
+                href="${escapeHtml(row.music_url)}"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Open ↗
+              </a>
+            `
+            : ""
+        }
+
+      </div>
+
+      ${
+        row.music_preview
+          ? `
+            <audio
+              controls
+              preload="none"
+              src="${escapeHtml(row.music_preview)}"
+            ></audio>
+          `
+          : ""
+      }
+
+    </div>
+  `;
+} else if (row.spotify_url) {
+
+  const spotify =
+    spotifyEmbedUrl(row.spotify_url);
+
+  if (spotify) {
+    musicHtml = `
+      <div class="spotify">
+        <iframe
+          src="${spotify}"
+          title="Spotify player"
+          loading="lazy"
+          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+        ></iframe>
+      </div>
+    `;
+  }
+}
 
 
     card.innerHTML = `
@@ -356,22 +691,7 @@
         ${letter}
       </div>
 
-      ${
-        spotify
-          ? `
-            <div class="spotify">
-
-              <iframe
-                src="${spotify}"
-                title="Spotify player"
-                loading="lazy"
-                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-              ></iframe>
-
-            </div>
-          `
-          : ""
-      }
+      ${musicHtml}
 
       <div class="date">
         ${formatDate(row.created_at)}
@@ -418,35 +738,12 @@
           5000
         );
 
-
-      const spotifyRaw =
-        cleanText(
-          $("spotifyUrl").value,
-          500
-        );
-
-
-      const spotify =
-        spotifyEmbedUrl(spotifyRaw);
-
-
       if (!toName || !msg) {
-
-        return setStatus(
-          "Please fill in the recipient and your letter.",
-          true
-        );
-
-      }
-
-
-      if (spotifyRaw && !spotify) {
-
-        return setStatus(
-          "That doesn't look like a valid Spotify content link.",
-          true
-        );
-
+  return setStatus(
+    "Please fill in the recipient and your letter.",
+    true
+  );
+}
       }
 
 
@@ -459,25 +756,30 @@
       submitBtn.textContent =
         "Sending into the universe…";
 
+  const { error } = await db
+  .from("letters")
+  .insert({
+    to_name: toName,
+    from_name: fromName || null,
+    message: msg,
 
-      const {
-        error
-      } = await db
-        .from("letters")
-        .insert({
+    spotify_url: null,
 
-          to_name:toName,
+    music_title:
+      musicTitle.value || null,
 
-          from_name:
-            fromName || null,
+    music_artist:
+      musicArtist.value || null,
 
-          message:msg,
+    music_artwork:
+      musicArtwork.value || null,
 
-          spotify_url:
-            spotifyRaw || null
+    music_url:
+      musicUrl.value || null,
 
-        });
-
+    music_preview:
+      musicPreview.value || null
+  });
 
       submitBtn.disabled = false;
 
@@ -496,19 +798,21 @@
 
 }
 
+  letterForm.reset();
 
-      letterForm.reset();
+messageCount.textContent = "0";
 
-      messageCount.textContent =
-        "0";
+clearSelectedMusic();
 
+musicResults.innerHTML = "";
 
-      setStatus(
-        "Your letter is out there. ✦",
-        false
-      );
+musicStatus.textContent = "";
 
-
+setStatus(
+  "Your letter is out there. ✦",
+  false
+);
+  
       showToast(
         "Letter posted ✦"
       );
