@@ -881,7 +881,7 @@
 
 
     selectedMusic.classList.add(
-      "show"
+      "has-song"
     );
 
 
@@ -942,7 +942,7 @@
       selectedMusic.innerHTML = "";
 
       selectedMusic.classList.remove(
-        "show"
+        "has-song"
       );
 
     }
