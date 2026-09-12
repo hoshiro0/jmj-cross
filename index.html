@@ -145,19 +145,56 @@
             </div>
 
 
-            <label for="spotifyUrl">
-              Add a song
-              <small>optional</small>
-            </label>
+            <label for="musicSearch">
+  Add a song
+  <small>optional</small>
+</label>
 
-            <input
-              id="spotifyUrl"
-              name="spotifyUrl"
-              type="url"
-              maxlength="500"
-              placeholder="Paste a Spotify track, album, playlist, artist, show, or episode link"
-            >
+<div class="music-search">
+  <input
+    id="musicSearch"
+    type="text"
+    maxlength="100"
+    placeholder="Search for a song..."
+    autocomplete="off"
+  >
 
+  <button
+    id="musicSearchBtn"
+    type="button"
+  >
+    Search
+  </button>
+</div>
+
+<div id="musicResults" class="music-results"></div>
+
+<div id="selectedMusic" class="selected-music"></div>
+
+<input
+  id="musicTitle"
+  type="hidden"
+>
+
+<input
+  id="musicArtist"
+  type="hidden"
+>
+
+<input
+  id="musicArtwork"
+  type="hidden"
+>
+
+<input
+  id="musicUrl"
+  type="hidden"
+>
+
+<input
+  id="musicPreview"
+  type="hidden"
+>
 
             <label class="checkbox-row">
               <input
