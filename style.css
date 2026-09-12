@@ -183,19 +183,6 @@ footer{position:relative;z-index:2;display:flex;justify-content:center;gap:15px;
   margin-top: 10px;
 }
 
-.music-result {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  padding: 10px;
-  border: 1px solid var(--line);
-  background: rgba(4,6,17,.42);
-  border-radius: 14px;
-  color: var(--text);
-  text-align: left;
-}
-
 .music-info {
   flex: 1;
   min-width: 0;
