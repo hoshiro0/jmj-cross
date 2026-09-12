@@ -487,24 +487,14 @@
 
       if (error) {
 
-        console.error(error);
+  console.error("SUPABASE ERROR:", error);
 
+  return setStatus(
+    `Supabase error: ${error.message}`,
+    true
+  );
 
-        return setStatus(
-
-          error.message
-            .toLowerCase()
-            .includes("row-level security")
-
-            ? "Posting is blocked by your database policy. Run the complete supabase.sql setup."
-
-            : "Something went wrong while posting. Check your Supabase setup.",
-
-          true
-
-        );
-
-      }
+}
 
 
       letterForm.reset();
