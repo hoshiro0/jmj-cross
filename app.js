@@ -324,21 +324,28 @@ async function searchMusic() {
   musicResults.innerHTML = "";
 
   try {
-    const { data, error } =
-  await db.functions.invoke(
-    "search-music",
-    {
-      body: {
-        query: query.slice(0, 100)
-      }
-    }
+    const response = await fetch(
+  `${config.SUPABASE_URL}/functions/v1/search-music`,
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "apikey": config.SUPABASE_PUBLISHABLE_KEY,
+      "Authorization":
+        `Bearer ${config.SUPABASE_PUBLISHABLE_KEY}`
+    },
+    body: JSON.stringify({
+      query: query.slice(0, 100)
+    })
+  }
+);
+
+const data = await response.json();
+
+if (!response.ok) {
+  throw new Error(
+    data.error || "Music search failed."
   );
-
-console.log("MUSIC FUNCTION DATA:", data);
-console.log("MUSIC FUNCTION ERROR:", error);
-
-if (error) {
-  throw error;
 }
 
     if (!data.results || !data.results.length) {
