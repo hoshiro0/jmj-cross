@@ -111,6 +111,20 @@ footer{position:relative;z-index:2;display:flex;justify-content:center;gap:15px;
   .card{padding:20px}.card-top{flex-direction:column;gap:4px}.from{text-align:left}
 }
 
+.star-player {
+  padding: 9px 10px;
+}
+
+.star-time {
+  min-width: 62px;
+  font-size: 9px;
+}
+
+.card-music-link {
+  padding: 5px 8px;
+  font-size: 9px;
+}
+
 /* =========================
    STARLETTERS TEXT LOGO
    ========================= */
@@ -403,9 +417,118 @@ footer{position:relative;z-index:2;display:flex;justify-content:center;gap:15px;
   border-color: rgba(201,185,255,.4);
 }
 
-.music-card audio {
-  width: 100%;
-  margin-top: 8px;
+/* =========================
+   STARLETTERS MINI PLAYER
+   ========================= */
+
+.star-player {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 1px solid rgba(201,185,255,.16);
+  background: rgba(201,185,255,.045);
+  border-radius: 14px;
+}
+
+.star-audio {
+  display: none;
+}
+
+.star-play {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(201,185,255,.28);
+  background: rgba(201,185,255,.09);
+  color: var(--accent);
+  border-radius: 50%;
+  font-size: 12px;
+  line-height: 1;
+  padding: 0;
+  transition: .2s ease;
+}
+
+.star-play:hover {
+  background: rgba(201,185,255,.17);
+  border-color: rgba(201,185,255,.45);
+  color: var(--text);
+  transform: scale(1.04);
+}
+
+.star-player-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.star-progress-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.star-progress {
+  flex: 1;
+  min-width: 0;
+  height: 4px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  background: rgba(255,255,255,.12);
+  border-radius: 99px;
+  cursor: pointer;
+}
+
+.star-progress::-webkit-slider-runnable-track {
+  height: 4px;
+  background: rgba(255,255,255,.12);
+  border-radius: 99px;
+}
+
+.star-progress::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 10px;
+  height: 10px;
+  margin-top: -3px;
+  border: 0;
+  background: var(--accent);
+  border-radius: 50%;
+}
+
+.star-progress::-moz-range-track {
+  height: 4px;
+  background: rgba(255,255,255,.12);
+  border-radius: 99px;
+}
+
+.star-progress::-moz-range-progress {
+  height: 4px;
+  background: var(--accent);
+  border-radius: 99px;
+}
+
+.star-progress::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border: 0;
+  background: var(--accent);
+  border-radius: 50%;
+}
+
+.star-time {
+  flex: 0 0 auto;
+  min-width: 68px;
+  color: var(--soft);
+  font-size: 10px;
+  text-align: right;
+  white-space: nowrap;
 }
 
 @media(max-width:650px){
@@ -440,4 +563,70 @@ footer{position:relative;z-index:2;display:flex;justify-content:center;gap:15px;
 
 .report-letter:hover {
   color: var(--danger);
+}
+
+.card-music-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex: 0 0 auto;
+  color: var(--accent);
+  font-size: 10px;
+  text-decoration: none;
+  border: 1px solid rgba(201,185,255,.2);
+  background: rgba(201,185,255,.06);
+  padding: 6px 9px;
+  border-radius: 999px;
+  transition: .2s ease;
+}
+
+.card-music-link:hover {
+  color: var(--text);
+  background: rgba(201,185,255,.13);
+  border-color: rgba(201,185,255,.4);
+}
+
+.card-music {
+  margin-top: 20px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  background: rgba(4,6,17,.38);
+  border-radius: 14px;
+}
+
+.card-music-top {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.card-music-artwork {
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  object-fit: cover;
+  border-radius: 9px;
+}
+
+.card-music-info {
+  min-width: 0;
+  flex: 1;
+}
+
+.card-music-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.card-music-artist {
+  margin-top: 3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--muted);
+  font-size: 11px;
 }
