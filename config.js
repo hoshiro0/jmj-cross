@@ -1,4 +1,7 @@
 window.STARLETTERS_CONFIG = {
-  SUPABASE_URL: "https://oszzlrnacibwuahzetxu.supabase.co",
-  SUPABASE_PUBLISHABLE_KEY: "sb_publishable_xtjlDriprnd7M4tGyTkLpA_puVL6LoT"
+  SUPABASE_URL:
+    "https://oszzlrnacibwuahzetxu.supabase.co",
+
+  SUPABASE_PUBLISHABLE_KEY:
+    "sb_publishable_xtjlDriprnd7M4tGyTkLpA_puVL6LoT"
 };
