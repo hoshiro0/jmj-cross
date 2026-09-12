@@ -343,3 +343,18 @@ footer{position:relative;z-index:2;display:flex;justify-content:center;gap:15px;
     min-height: 42px;
   }
 }
+
+.report-letter {
+  border: 0;
+  background: transparent;
+  color: var(--soft);
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 6px 0;
+  transition: color .2s ease;
+}
+
+.report-letter:hover {
+  color: var(--danger);
+}
