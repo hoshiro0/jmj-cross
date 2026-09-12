@@ -7,7 +7,7 @@ A public anonymous love-letter website.
 - Public anonymous letters
 - Search letters by recipient
 - Optional sender name
-- Optional Spotify links
+- Optional music
 - Newest letters first
 - Astronomy-inspired design
 - Supabase database
