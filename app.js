@@ -82,6 +82,19 @@
 
 
   /* =========================
+     SAFE MUSIC STATUS
+  ========================== */
+
+  function setMusicStatus(text) {
+
+    if (musicStatus) {
+      musicStatus.textContent = text;
+    }
+
+  }
+
+
+  /* =========================
      FATAL ERROR
   ========================== */
 
@@ -182,15 +195,19 @@
     const isSearch =
       view === "search";
 
-    homeView.classList.toggle(
-      "active",
-      !isSearch
-    );
+    if (homeView) {
+      homeView.classList.toggle(
+        "active",
+        !isSearch
+      );
+    }
 
-    searchView.classList.toggle(
-      "active",
-      isSearch
-    );
+    if (searchView) {
+      searchView.classList.toggle(
+        "active",
+        isSearch
+      );
+    }
 
     navButtons.forEach((btn) => {
 
@@ -438,14 +455,19 @@
 
   async function searchMusic() {
 
+    if (!musicSearch || !musicResults) {
+      return;
+    }
+
     const query =
       musicSearch.value.trim();
 
 
     if (!query) {
 
-      musicStatus.textContent =
-        "Type a song or artist first.";
+      setMusicStatus(
+        "Type a song or artist first."
+      );
 
       musicResults.innerHTML = "";
 
@@ -454,13 +476,19 @@
     }
 
 
-    musicSearchBtn.disabled = true;
+    if (musicSearchBtn) {
 
-    musicSearchBtn.textContent =
-      "Searching…";
+      musicSearchBtn.disabled = true;
 
-    musicStatus.textContent =
-      "Connecting to music search…";
+      musicSearchBtn.textContent =
+        "Searching…";
+
+    }
+
+
+    setMusicStatus(
+      "Connecting to music search…"
+    );
 
     musicResults.innerHTML = "";
 
@@ -472,8 +500,9 @@
 
     try {
 
-      musicStatus.textContent =
-        "Sending request to Supabase…";
+      setMusicStatus(
+        "Sending request to Supabase…"
+      );
 
 
       const controller =
@@ -524,8 +553,9 @@
       }
 
 
-      musicStatus.textContent =
-        `Supabase responded: HTTP ${response.status}`;
+      setMusicStatus(
+        `Supabase responded: HTTP ${response.status}`
+      );
 
 
       const text =
@@ -540,7 +570,6 @@
 
       let data;
 
-
       try {
 
         data =
@@ -549,7 +578,7 @@
       } catch {
 
         throw new Error(
-          `Supabase returned invalid JSON: ${text.slice(0, 200)}`
+          `Supabase returned an invalid response: ${text.slice(0, 200)}`
         );
 
       }
@@ -559,7 +588,7 @@
 
         throw new Error(
           data?.error ||
-          `Music search failed with HTTP ${response.status}`
+          `Music search failed (${response.status}).`
         );
 
       }
@@ -579,8 +608,9 @@
 
       if (!data.results.length) {
 
-        musicStatus.textContent =
-          "Connected successfully, but no songs were found.";
+        setMusicStatus(
+          "Connected successfully, but no songs were found."
+        );
 
         musicResults.innerHTML = "";
 
@@ -589,8 +619,9 @@
       }
 
 
-      musicStatus.textContent =
-        `Connected! ${data.results.length} songs found.`;
+      setMusicStatus(
+        `Connected! ${data.results.length} songs found.`
+      );
 
 
       renderMusicResults(
@@ -611,13 +642,18 @@
         error.name === "AbortError"
       ) {
 
-        musicStatus.textContent =
-          "Request timed out after 10 seconds. The browser could not reach the music function.";
+        setMusicStatus(
+          "Request timed out after 10 seconds. The browser could not reach the music function."
+        );
 
       } else {
 
-        musicStatus.textContent =
-          `Music search error: ${error?.message || "Unknown error."}`;
+        setMusicStatus(
+          `Music search error: ${
+            error?.message ||
+            "Couldn't search for music right now."
+          }`
+        );
 
       }
 
@@ -626,10 +662,14 @@
 
     } finally {
 
-      musicSearchBtn.disabled = false;
+      if (musicSearchBtn) {
 
-      musicSearchBtn.textContent =
-        "Search";
+        musicSearchBtn.disabled = false;
+
+        musicSearchBtn.textContent =
+          "Search";
+
+      }
 
     }
 
@@ -643,6 +683,10 @@
   function renderMusicResults(
     tracks
   ) {
+
+    if (!musicResults) {
+      return;
+    }
 
     musicResults.innerHTML = "";
 
@@ -752,6 +796,18 @@
     track
   ) {
 
+    if (
+      !musicTitle ||
+      !musicArtist ||
+      !musicArtwork ||
+      !musicUrl ||
+      !musicPreview ||
+      !selectedMusic
+    ) {
+      return;
+    }
+
+
     musicTitle.value =
       track.title || "";
 
@@ -832,8 +888,9 @@
     musicResults.innerHTML = "";
 
 
-    musicStatus.textContent =
-      "Song selected. ✦";
+    setMusicStatus(
+      "Song selected. ✦"
+    );
 
 
     const removeButton =
@@ -860,19 +917,37 @@
 
   function clearSelectedMusic() {
 
-    musicTitle.value = "";
-    musicArtist.value = "";
-    musicArtwork.value = "";
-    musicUrl.value = "";
-    musicPreview.value = "";
+    if (musicTitle) {
+      musicTitle.value = "";
+    }
 
-    selectedMusic.innerHTML = "";
+    if (musicArtist) {
+      musicArtist.value = "";
+    }
 
-    selectedMusic.classList.remove(
-      "show"
-    );
+    if (musicArtwork) {
+      musicArtwork.value = "";
+    }
 
-    musicStatus.textContent = "";
+    if (musicUrl) {
+      musicUrl.value = "";
+    }
+
+    if (musicPreview) {
+      musicPreview.value = "";
+    }
+
+    if (selectedMusic) {
+
+      selectedMusic.innerHTML = "";
+
+      selectedMusic.classList.remove(
+        "show"
+      );
+
+    }
+
+    setMusicStatus("");
 
   }
 
@@ -1119,237 +1194,259 @@
      POST LETTER
   ========================== */
 
-  letterForm.addEventListener(
-    "submit",
-    async (e) => {
+  if (letterForm) {
 
-      e.preventDefault();
+    letterForm.addEventListener(
+      "submit",
+      async (e) => {
 
-
-      formStatus.className =
-        "status";
-
-      formStatus.textContent =
-        "";
+        e.preventDefault();
 
 
-      const toName =
-        cleanText(
-          $("toName").value,
-          80
-        );
+        if (formStatus) {
+
+          formStatus.className =
+            "status";
+
+          formStatus.textContent =
+            "";
+
+        }
 
 
-      const fromName =
-        cleanText(
-          $("fromName").value,
-          80
-        );
-
-
-      const msg =
-        cleanText(
-          message.value,
-          5000
-        );
-
-
-      if (
-        !toName ||
-        !msg
-      ) {
-
-        return setStatus(
-          "Please fill in the recipient and your letter.",
-          true
-        );
-
-      }
-
-
-      const submitBtn =
-        $("submitBtn");
-
-
-      submitBtn.disabled =
-        true;
-
-      submitBtn.textContent =
-        "Sending into the universe…";
-
-
-      try {
-
-        const musicData = {
-          music_title:
-            cleanText(
-              musicTitle.value,
-              200
-            ) || null,
-
-          music_artist:
-            cleanText(
-              musicArtist.value,
-              200
-            ) || null,
-
-          music_artwork:
-            safeHttpsUrl(
-              musicArtwork.value
-            ) || null,
-
-          music_url:
-            safeHttpsUrl(
-              musicUrl.value
-            ) || null,
-
-          music_preview:
-            safeHttpsUrl(
-              musicPreview.value
-            ) || null
-        };
-
-
-        const insertPromise =
-          db
-            .from("letters")
-            .insert({
-              to_name:
-                toName,
-
-              from_name:
-                fromName ||
-                null,
-
-              message:
-                msg,
-
-              spotify_url:
-                null,
-
-              music_title:
-                musicData.music_title,
-
-              music_artist:
-                musicData.music_artist,
-
-              music_artwork:
-                musicData.music_artwork,
-
-              music_url:
-                musicData.music_url,
-
-              music_preview:
-                musicData.music_preview
-            });
-
-
-        const result =
-          await withTimeout(
-            insertPromise,
-            10000,
-            "Posting the letter timed out. Please try again."
+        const toName =
+          cleanText(
+            $("toName")?.value,
+            80
           );
 
 
-        if (result.error) {
-
-          console.error(
-            "SUPABASE ERROR:",
-            result.error
+        const fromName =
+          cleanText(
+            $("fromName")?.value,
+            80
           );
 
-          throw new Error(
-            result.error.message ||
-            "Unable to post your letter."
+
+        const msg =
+          cleanText(
+            message?.value,
+            5000
+          );
+
+
+        if (
+          !toName ||
+          !msg
+        ) {
+
+          return setStatus(
+            "Please fill in the recipient and your letter.",
+            true
           );
 
         }
 
 
-        letterForm.reset();
+        const submitBtn =
+          $("submitBtn");
 
 
-        messageCount.textContent =
-          "0";
+        if (submitBtn) {
+
+          submitBtn.disabled =
+            true;
+
+          submitBtn.textContent =
+            "Sending into the universe…";
+
+        }
 
 
-        clearSelectedMusic();
+        try {
+
+          const musicData = {
+            music_title:
+              cleanText(
+                musicTitle?.value,
+                200
+              ) || null,
+
+            music_artist:
+              cleanText(
+                musicArtist?.value,
+                200
+              ) || null,
+
+            music_artwork:
+              safeHttpsUrl(
+                musicArtwork?.value
+              ) || null,
+
+            music_url:
+              safeHttpsUrl(
+                musicUrl?.value
+              ) || null,
+
+            music_preview:
+              safeHttpsUrl(
+                musicPreview?.value
+              ) || null
+          };
 
 
-        musicResults.innerHTML = "";
+          const insertPromise =
+            db
+              .from("letters")
+              .insert({
+                to_name:
+                  toName,
 
-        musicStatus.textContent =
-          "";
+                from_name:
+                  fromName ||
+                  null,
+
+                message:
+                  msg,
+
+                spotify_url:
+                  null,
+
+                music_title:
+                  musicData.music_title,
+
+                music_artist:
+                  musicData.music_artist,
+
+                music_artwork:
+                  musicData.music_artwork,
+
+                music_url:
+                  musicData.music_url,
+
+                music_preview:
+                  musicData.music_preview
+              });
 
 
-        setStatus(
-          "Your letter is out there. ✦",
-          false
-        );
-
-
-        showToast(
-          "Letter posted ✦"
-        );
-
-
-        setTimeout(
-          () => {
-
-            const searchName =
-              $("searchName");
-
-
-            if (searchName) {
-
-              searchName.value =
-                toName;
-
-            }
-
-
-            setView(
-              "search"
+          const result =
+            await withTimeout(
+              insertPromise,
+              10000,
+              "Posting the letter timed out. Please try again."
             );
 
 
-            searchFor(
-              toName
+          if (result.error) {
+
+            console.error(
+              "SUPABASE ERROR:",
+              result.error
             );
 
-          },
-          700
-        );
+            throw new Error(
+              result.error.message ||
+              "Unable to post your letter."
+            );
+
+          }
 
 
-      } catch (error) {
-
-        console.error(
-          "POST LETTER ERROR:",
-          error
-        );
+          letterForm.reset();
 
 
-        setStatus(
-          error?.message ||
-          "Couldn't post your letter right now. Please try again.",
-          true
-        );
+          if (messageCount) {
+
+            messageCount.textContent =
+              "0";
+
+          }
 
 
-      } finally {
+          clearSelectedMusic();
 
-        submitBtn.disabled =
-          false;
 
-        submitBtn.textContent =
-          "Post this letter ✦";
+          if (musicResults) {
+            musicResults.innerHTML = "";
+          }
+
+
+          setMusicStatus("");
+
+
+          setStatus(
+            "Your letter is out there. ✦",
+            false
+          );
+
+
+          showToast(
+            "Letter posted ✦"
+          );
+
+
+          setTimeout(
+            () => {
+
+              const searchName =
+                $("searchName");
+
+
+              if (searchName) {
+
+                searchName.value =
+                  toName;
+
+              }
+
+
+              setView(
+                "search"
+              );
+
+
+              searchFor(
+                toName
+              );
+
+            },
+            700
+          );
+
+
+        } catch (error) {
+
+          console.error(
+            "POST LETTER ERROR:",
+            error
+          );
+
+
+          setStatus(
+            error?.message ||
+            "Couldn't post your letter right now. Please try again.",
+            true
+          );
+
+
+        } finally {
+
+          if (submitBtn) {
+
+            submitBtn.disabled =
+              false;
+
+            submitBtn.textContent =
+              "Post this letter ✦";
+
+          }
+
+        }
 
       }
+    );
 
-    }
-  );
+  }
 
 
   /* =========================
@@ -1360,6 +1457,10 @@
     text,
     error
   ) {
+
+    if (!formStatus) {
+      return;
+    }
 
     formStatus.textContent =
       text;
@@ -1379,30 +1480,34 @@
      SEARCH FORM
   ========================== */
 
-  searchForm.addEventListener(
-    "submit",
-    async (e) => {
+  if (searchForm) {
 
-      e.preventDefault();
+    searchForm.addEventListener(
+      "submit",
+      async (e) => {
 
-
-      const name =
-        cleanText(
-          $("searchName").value,
-          80
-        );
+        e.preventDefault();
 
 
-      if (name) {
+        const name =
+          cleanText(
+            $("searchName")?.value,
+            80
+          );
 
-        await searchFor(
-          name
-        );
+
+        if (name) {
+
+          await searchFor(
+            name
+          );
+
+        }
 
       }
+    );
 
-    }
-  );
+  }
 
 
   /* =========================
@@ -1413,6 +1518,10 @@
     name
   ) {
 
+    if (!results) {
+      return;
+    }
+
     results.innerHTML = `
       <div class="empty">
         Looking among the stars…
@@ -1420,8 +1529,10 @@
     `;
 
 
-    resultsMeta.textContent =
-      "";
+    if (resultsMeta) {
+      resultsMeta.textContent =
+        "";
+    }
 
 
     try {
@@ -1466,7 +1577,7 @@
 
 
       const data =
-        result.data;
+        result.data || [];
 
       const error =
         result.error;
@@ -1487,14 +1598,18 @@
       }
 
 
-      resultsMeta.textContent =
-        data.length
-          ? `${data.length} letter${
-              data.length === 1
-                ? ""
-                : "s"
-            } written for “${name}”`
-          : `No public letters found for “${name}” yet.`;
+      if (resultsMeta) {
+
+        resultsMeta.textContent =
+          data.length
+            ? `${data.length} letter${
+                data.length === 1
+                  ? ""
+                  : "s"
+              } written for “${name}”`
+            : `No public letters found for “${name}” yet.`;
+
+      }
 
 
       results.innerHTML =
@@ -1543,8 +1658,12 @@
       );
 
 
-      resultsMeta.textContent =
-        "";
+      if (resultsMeta) {
+
+        resultsMeta.textContent =
+          "";
+
+      }
 
 
       results.innerHTML = `
