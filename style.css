@@ -331,16 +331,22 @@ footer{position:relative;z-index:2;display:flex;justify-content:center;gap:15px;
 }
 
 .remove-music {
-  border: 0;
-  background: transparent;
-  color: var(--muted);
+  border: none !important;
+  background: transparent !important;
+  color: var(--muted) !important;
+  font-family: inherit;
   font-size: 11px;
+  font-weight: 400;
   padding: 7px;
+  margin: 0;
   cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
 }
 
 .remove-music:hover {
-  color: var(--text);
+  color: var(--text) !important;
+  background: transparent !important;
 }
 
 .music-card {
