@@ -384,9 +384,23 @@ footer{position:relative;z-index:2;display:flex;justify-content:center;gap:15px;
 }
 
 .music-card a {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   color: var(--accent);
   font-size: 11px;
   text-decoration: none;
+  border: 1px solid rgba(201,185,255,.25);
+  background: rgba(201,185,255,.07);
+  padding: 6px 10px;
+  border-radius: 999px;
+  transition: .2s ease;
+}
+
+.music-card a:hover {
+  color: var(--text);
+  background: rgba(201,185,255,.14);
+  border-color: rgba(201,185,255,.4);
 }
 
 .music-card audio {
