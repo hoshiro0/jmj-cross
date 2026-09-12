@@ -330,6 +330,19 @@ footer{position:relative;z-index:2;display:flex;justify-content:center;gap:15px;
   color: var(--text);
 }
 
+.remove-music {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 11px;
+  padding: 7px;
+  cursor: pointer;
+}
+
+.remove-music:hover {
+  color: var(--text);
+}
+
 .music-card {
   display: flex;
   align-items: center;
