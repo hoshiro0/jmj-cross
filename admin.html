@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Starletters — Owner</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      background: #080b18;
+      color: #f4f5ff;
+      padding: 24px;
+    }
+
+    .container {
+      width: min(900px, 100%);
+      margin: 0 auto;
+    }
+
+    h1 {
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      opacity: 0.7;
+      margin-bottom: 28px;
+    }
+
+    .panel {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 18px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    input {
+      width: 100%;
+      padding: 13px;
+      margin: 7px 0;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.07);
+      color: white;
+      outline: none;
+    }
+
+    button {
+      border: 0;
+      border-radius: 10px;
+      padding: 11px 16px;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+
+    .login-btn {
+      width: 100%;
+    }
+
+    .logout-btn {
+      float: right;
+    }
+
+    .letter {
+      background: rgba(255,255,255,0.05);
+      border-radius: 14px;
+      padding: 18px;
+      margin-top: 14px;
+    }
+
+    .letter-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 15px;
+      align-items: flex-start;
+    }
+
+    .recipient {
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .date {
+      opacity: 0.55;
+      font-size: 13px;
+    }
+
+    .message {
+      white-space: pre-wrap;
+      line-height: 1.6;
+      margin-top: 15px;
+    }
+
+    .from {
+      opacity: 0.7;
+      margin-top: 12px;
+      font-size: 14px;
+    }
+
+    .delete-btn {
+      background: #9d3030;
+      color: white;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    #status {
+      margin-top: 12px;
+      opacity: 0.75;
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="container">
+
+    <h1>✦ Starletters Owner</h1>
+
+    <p class="subtitle">
+      Private owner dashboard
+    </p>
+
+
+    <!-- LOGIN -->
+
+    <section
+      id="loginPanel"
+      class="panel"
+    >
+
+      <h2>Owner Login</h2>
+
+      <input
+        id="email"
+        type="email"
+        placeholder="Email"
+        autocomplete="email"
+      >
+
+      <input
+        id="password"
+        type="password"
+        placeholder="Password"
+        autocomplete="current-password"
+      >
+
+      <button
+        id="loginBtn"
+        class="login-btn"
+      >
+        Log in
+      </button>
+
+      <div id="loginStatus"></div>
+
+    </section>
+
+
+    <!-- ADMIN -->
+
+    <section
+      id="adminPanel"
+      class="hidden"
+    >
+
+      <div class="panel">
+
+        <button
+          id="logoutBtn"
+          class="logout-btn"
+        >
+          Log out
+        </button>
+
+        <h2>Letters</h2>
+
+        <div id="status">
+          Loading...
+        </div>
+
+      </div>
+
+
+      <div id="letters"></div>
+
+    </section>
+
+  </main>
+
+
+  <!-- Supabase -->
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script src="config.js"></script>
+
+
+  <script>
+
+    const config =
+      window.STARLETTERS_CONFIG || {};
+
+    const supabase =
+      window.supabase.createClient(
+        config.SUPABASE_URL,
+        config.SUPABASE_PUBLISHABLE_KEY
+      );
+
+
+    const loginPanel =
+      document.getElementById("loginPanel");
+
+    const adminPanel =
+      document.getElementById("adminPanel");
+
+    const loginBtn =
+      document.getElementById("loginBtn");
+
+    const logoutBtn =
+      document.getElementById("logoutBtn");
+
+    const email =
+      document.getElementById("email");
+
+    const password =
+      document.getElementById("password");
+
+    const loginStatus =
+      document.getElementById("loginStatus");
+
+    const letters =
+      document.getElementById("letters");
+
+    const status =
+      document.getElementById("status");
+
+
+    async function checkOwner() {
+
+      const {
+        data: {
+          user
+        }
+      } = await supabase.auth.getUser();
+
+
+      if (!user) {
+
+        loginPanel.classList.remove(
+          "hidden"
+        );
+
+        adminPanel.classList.add(
+          "hidden"
+        );
+
+        return;
+
+      }
+
+
+      loginPanel.classList.add(
+        "hidden"
+      );
+
+      adminPanel.classList.remove(
+        "hidden"
+      );
+
+      loadLetters();
+
+    }
+
+
+    loginBtn.addEventListener(
+      "click",
+      async () => {
+
+        loginStatus.textContent =
+          "Logging in...";
+
+
+        const {
+          error
+        } =
+          await supabase.auth.signInWithPassword({
+
+            email:
+              email.value.trim(),
+
+            password:
+              password.value
+
+          });
+
+
+        if (error) {
+
+          loginStatus.textContent =
+            error.message;
+
+          return;
+
+        }
+
+
+        loginStatus.textContent =
+          "";
+
+        checkOwner();
+
+      }
+    );
+
+
+    logoutBtn.addEventListener(
+      "click",
+      async () => {
+
+        await supabase.auth.signOut();
+
+        checkOwner();
+
+      }
+    );
+
+
+    async function loadLetters() {
+
+      status.textContent =
+        "Loading letters...";
+
+
+      const {
+        data,
+        error
+      } =
+        await supabase
+          .from("letters")
+          .select("*")
+          .order(
+            "created_at",
+            {
+              ascending: false
+            }
+          );
+
+
+      if (error) {
+
+        status.textContent =
+          "Unable to load letters: " +
+          error.message;
+
+        return;
+
+      }
+
+
+      letters.innerHTML = "";
+
+
+      if (!data || data.length === 0) {
+
+        status.textContent =
+          "No letters yet.";
+
+        return;
+
+      }
+
+
+      status.textContent =
+        `${data.length} letter(s)`;
+
+
+      data.forEach(
+        (letter) => {
+
+          const card =
+            document.createElement(
+              "article"
+            );
+
+          card.className =
+            "letter";
+
+
+          const date =
+            letter.created_at
+              ? new Date(
+                  letter.created_at
+                ).toLocaleString()
+              : "";
+
+
+          card.innerHTML = `
+
+            <div class="letter-header">
+
+              <div>
+
+                <div class="recipient">
+                  To: ${escapeHtml(
+                    letter.to_name
+                  )}
+                </div>
+
+                <div class="date">
+                  ${escapeHtml(date)}
+                </div>
+
+              </div>
+
+              <button
+                class="delete-btn"
+                data-id="${letter.id}"
+              >
+                Delete
+              </button>
+
+            </div>
+
+            <div class="message">
+              ${escapeHtml(
+                letter.message
+              )}
+            </div>
+
+            ${
+              letter.from_name
+                ? `
+                  <div class="from">
+                    From:
+                    ${escapeHtml(
+                      letter.from_name
+                    )}
+                  </div>
+                `
+                : ""
+            }
+
+          `;
+
+
+          const deleteBtn =
+            card.querySelector(
+              ".delete-btn"
+            );
+
+
+          deleteBtn.addEventListener(
+            "click",
+            () => deleteLetter(
+              letter.id
+            )
+          );
+
+
+          letters.appendChild(
+            card
+          );
+
+        }
+      );
+
+    }
+
+
+    async function deleteLetter(id) {
+
+      const confirmed =
+        confirm(
+          "Delete this letter permanently?"
+        );
+
+
+      if (!confirmed) {
+        return;
+      }
+
+
+      const {
+        error
+      } =
+        await supabase
+          .from("letters")
+          .delete()
+          .eq(
+            "id",
+            id
+          );
+
+
+      if (error) {
+
+        alert(
+          "Delete failed: " +
+          error.message
+        );
+
+        return;
+
+      }
+
+
+      loadLetters();
+
+    }
+
+
+    function escapeHtml(value) {
+
+      return String(
+        value ?? ""
+      )
+        .replace(
+          /&/g,
+          "&amp;"
+        )
+        .replace(
+          /</g,
+          "&lt;"
+        )
+        .replace(
+          />/g,
+          "&gt;"
+        )
+        .replace(
+          /"/g,
+          "&quot;"
+        )
+        .replace(
+          /'/g,
+          "&#039;"
+        );
+
+    }
+
+
+    supabase.auth.onAuthStateChange(
+      () => {
+        checkOwner();
+      }
+    );
+
+
+    checkOwner();
+
+  </script>
+
+</body>
+</html>
