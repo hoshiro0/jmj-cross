@@ -1,755 +1,283 @@
-from pathlib import Path
-import zipfile, textwrap
-
-root = Path("/mnt/data/starletters")
-(root / ".github/workflows").mkdir(parents=True, exist_ok=True)
-
-files = {
-"index.html": r'''<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Starletters — anonymous public letters written under the same sky.">
-  <title>Starletters ✦</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Starletters — Letters Written Into The Universe</title>
+
+  <meta
+    name="description"
+    content="A little corner of the universe for letters that were meant to be said."
+  >
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  >
+
   <link rel="stylesheet" href="style.css">
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
+
 <body>
-  <div class="stars"></div>
+
   <header class="site-header">
-    <a class="brand" href="#" data-view="home">STARLETTERS <span>✦</span></a>
+    <a href="#" class="brand" data-view="home">
+      STAR<span>LETTERS</span>
+    </a>
+
     <nav>
-      <button class="nav-btn active" data-view="home">Write</button>
-      <button class="nav-btn" data-view="search">Find letters</button>
+      <button class="nav-btn active" data-view="home">
+        Write
+      </button>
+
+      <button class="nav-btn" data-view="search">
+        Find Letters
+      </button>
     </nav>
   </header>
 
+
   <main>
+
+    <!-- =========================
+         WRITE VIEW
+    ========================== -->
+
     <section id="homeView" class="view active">
+
       <div class="hero">
-        <p class="eyebrow">a little corner of the universe</p>
-        <h1>Some things are easier<br><em>under the stars.</em></h1>
-        <p class="hero-copy">Write a letter for someone. Add a song. Leave it here for them to find.</p>
-        <button class="primary-btn" id="scrollToForm">Write a letter <span>↓</span></button>
+
+        <p class="eyebrow">
+          somewhere between the stars
+        </p>
+
+        <h1>
+          Some words are<br>
+          meant to <em>stay.</em>
+        </h1>
+
+        <p class="hero-copy">
+          Write something you never got to say.
+          Leave it here for the person it was meant for.
+          Maybe they'll find it someday.
+        </p>
+
+        <button
+          id="scrollToForm"
+          class="primary-btn"
+          type="button"
+        >
+          Write a letter ✦
+        </button>
+
       </div>
 
-      <div class="form-wrap" id="letterFormWrap">
-        <form id="letterForm" class="letter-form">
+
+      <div id="letterFormWrap" class="form-wrap">
+
+        <div class="letter-form">
+
           <div class="section-heading">
             <span>01</span>
-            <div><h2>Address it</h2><p>They'll find it by the name you put here.</p></div>
+
+            <div>
+              <h2>Write into the universe.</h2>
+
+              <p>
+                You can use your real name, a nickname, or stay anonymous.
+              </p>
+            </div>
           </div>
 
-          <label for="toName">To <span>*</span></label>
-          <input id="toName" name="toName" maxlength="80" required placeholder="e.g. Luna" autocomplete="off">
 
-          <label for="fromName">From <small>(optional)</small></label>
-          <input id="fromName" name="fromName" maxlength="80" placeholder="Your name, nickname, or Anonymous" autocomplete="off">
+          <form id="letterForm">
 
-          <div class="section-heading second">
-            <span>02</span>
-            <div><h2>Write it</h2><p>No account. No profile. Just your words.</p></div>
-          </div>
+            <label for="toName">
+              To <span>*</span>
+            </label>
 
-          <label for="message">Your letter <span>*</span></label>
-          <textarea id="message" name="message" maxlength="5000" required placeholder="Dear you..."></textarea>
-          <div class="counter"><span id="messageCount">0</span>/5000</div>
+            <input
+              id="toName"
+              name="toName"
+              type="text"
+              maxlength="80"
+              placeholder="Who is this for?"
+              autocomplete="off"
+              required
+            >
 
-          <div class="section-heading second">
-            <span>03</span>
-            <div><h2>Give it a soundtrack</h2><p>Paste a Spotify track, album, playlist, artist, episode, or show link.</p></div>
-          </div>
 
-          <label for="spotifyUrl">Spotify link <small>(optional)</small></label>
-          <input id="spotifyUrl" name="spotifyUrl" maxlength="500" type="url" placeholder="https://open.spotify.com/track/...">
+            <label for="fromName">
+              From
+              <small>optional</small>
+            </label>
 
-          <label class="checkbox-row">
-            <input id="agree" type="checkbox" required>
-            <span>I understand this letter will be publicly visible.</span>
-          </label>
+            <input
+              id="fromName"
+              name="fromName"
+              type="text"
+              maxlength="80"
+              placeholder="Your name, nickname, or leave it blank"
+              autocomplete="off"
+            >
 
-          <button class="primary-btn submit-btn" type="submit" id="submitBtn">Post this letter ✦</button>
-          <p class="form-note">Please don't post private information, passwords, phone numbers, addresses, or anything you wouldn't want publicly seen.</p>
-          <p id="formStatus" class="status" aria-live="polite"></p>
-        </form>
+
+            <label for="message">
+              Your letter <span>*</span>
+            </label>
+
+            <textarea
+              id="message"
+              name="message"
+              maxlength="5000"
+              placeholder="Write whatever you never got to say..."
+              required
+            ></textarea>
+
+            <div class="counter">
+              <span id="messageCount">0</span>/5000
+            </div>
+
+
+            <label for="spotifyUrl">
+              Add a song
+              <small>optional</small>
+            </label>
+
+            <input
+              id="spotifyUrl"
+              name="spotifyUrl"
+              type="url"
+              maxlength="500"
+              placeholder="Paste a Spotify track, album, playlist, artist, show, or episode link"
+            >
+
+
+            <label class="checkbox-row">
+              <input
+                id="agree"
+                type="checkbox"
+                required
+              >
+
+              <span>
+                I understand that this letter will be publicly visible
+                and that I shouldn't include private or sensitive information.
+              </span>
+            </label>
+
+
+            <button
+              id="submitBtn"
+              class="primary-btn submit-btn"
+              type="submit"
+            >
+              Post this letter ✦
+            </button>
+
+            <div
+              id="formStatus"
+              class="status"
+              aria-live="polite"
+            ></div>
+
+            <p class="form-note">
+              Letters are public. Please don't post passwords,
+              addresses, phone numbers, or other private information.
+            </p>
+
+          </form>
+
+        </div>
+
       </div>
+
     </section>
+
+
+    <!-- =========================
+         SEARCH VIEW
+    ========================== -->
 
     <section id="searchView" class="view">
+
       <div class="search-hero">
-        <p class="eyebrow">look beneath the constellation</p>
-        <h1>Find letters<br><em>written for them.</em></h1>
-        <p>Search the exact recipient name. Names are not case-sensitive.</p>
+
+        <p class="eyebrow">
+          find what was written
+        </p>
+
+        <h1>
+          Maybe someone<br>
+          wrote for <em>you.</em>
+        </h1>
+
+        <p>
+          Search a name to find public letters written for them.
+        </p>
+
+
         <form id="searchForm" class="search-box">
-          <input id="searchName" maxlength="80" required placeholder="Whose name are you looking for?" autocomplete="off">
-          <button type="submit">Search ✦</button>
+
+          <input
+            id="searchName"
+            type="text"
+            maxlength="80"
+            placeholder="Enter a name..."
+            autocomplete="off"
+            required
+          >
+
+          <button type="submit">
+            Search
+          </button>
+
         </form>
+
       </div>
 
-      <div id="resultsMeta" class="results-meta"></div>
-      <div id="results" class="results"></div>
+
+      <div
+        id="resultsMeta"
+        class="results-meta"
+      ></div>
+
+      <div
+        id="results"
+        class="results"
+      >
+        <div class="empty">
+          Search for a name to see their letters.
+        </div>
+      </div>
+
     </section>
+
   </main>
 
+
   <footer>
-    <span>made for the things we don't know how to say</span>
+    <span>STARLETTERS</span>
     <span>✦</span>
+    <span>letters written into the universe</span>
   </footer>
 
-  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <div
+    id="toast"
+    class="toast"
+    aria-live="polite"
+  ></div>
+
 
   <script src="config.js"></script>
   <script src="app.js"></script>
+
 </body>
 </html>
-''',
-
-"style.css": r''':root{
-  --bg:#070914;
-  --panel:rgba(17,21,43,.78);
-  --panel-2:rgba(23,28,54,.88);
-  --text:#f7f3ff;
-  --muted:#aaa8bf;
-  --soft:#77758d;
-  --line:rgba(255,255,255,.11);
-  --accent:#c9b9ff;
-  --accent-2:#f2d7ff;
-  --danger:#ff9baf;
-  --shadow:0 24px 70px rgba(0,0,0,.38);
-}
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{
-  margin:0; min-height:100vh; color:var(--text); background:
-  radial-gradient(circle at 50% -10%,rgba(111,87,190,.32),transparent 35rem),
-  radial-gradient(circle at 90% 35%,rgba(76,104,190,.12),transparent 25rem),
-  var(--bg);
-  font-family:"DM Sans",sans-serif;
-}
-body:before,body:after{content:"";position:fixed;inset:0;pointer-events:none}
-body:before{
-  background-image:
-    radial-gradient(circle,rgba(255,255,255,.8) 0 1px,transparent 1.5px),
-    radial-gradient(circle,rgba(255,255,255,.45) 0 1px,transparent 1.5px);
-  background-size:97px 83px,151px 137px;
-  background-position:17px 29px,71px 8px;
-  opacity:.45;
-}
-body:after{
-  background:linear-gradient(transparent 70%,rgba(7,9,20,.55));
-}
-button,input,textarea{font:inherit}
-button{cursor:pointer}
-.site-header{
-  position:sticky;top:0;z-index:20;display:flex;justify-content:space-between;align-items:center;
-  padding:18px clamp(18px,5vw,70px);background:rgba(7,9,20,.7);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)
-}
-.brand{color:var(--text);text-decoration:none;font-weight:600;letter-spacing:.18em;font-size:13px}
-.brand span{color:var(--accent)}
-nav{display:flex;gap:6px}
-.nav-btn{border:0;background:transparent;color:var(--muted);padding:9px 13px;border-radius:99px}
-.nav-btn:hover,.nav-btn.active{background:rgba(255,255,255,.07);color:var(--text)}
-main{position:relative;z-index:2;max-width:1040px;margin:auto;padding:0 20px 80px}
-.view{display:none}.view.active{display:block}
-.hero{text-align:center;padding:105px 0 90px}
-.eyebrow{text-transform:uppercase;letter-spacing:.22em;font-size:11px;color:var(--accent);margin:0 0 18px}
-h1,h2{font-family:"Cormorant Garamond",serif;font-weight:600}
-h1{font-size:clamp(52px,8vw,92px);line-height:.9;margin:0;letter-spacing:-.03em}
-h1 em{font-weight:500;color:var(--accent-2)}
-.hero-copy{max-width:520px;margin:28px auto 34px;color:var(--muted);line-height:1.7}
-.primary-btn{
-  border:1px solid rgba(255,255,255,.18);background:linear-gradient(135deg,#e5d7ff,#b7a3f1);
-  color:#171329;border-radius:99px;padding:13px 20px;font-weight:700;box-shadow:0 12px 35px rgba(163,132,255,.18)
-}
-.primary-btn:hover{transform:translateY(-1px)}
-.form-wrap{max-width:700px;margin:0 auto}
-.letter-form,.search-box{
-  background:linear-gradient(180deg,rgba(21,25,50,.9),rgba(12,15,34,.88));
-  border:1px solid var(--line);box-shadow:var(--shadow);border-radius:28px;padding:clamp(24px,5vw,48px)
-}
-.section-heading{display:flex;gap:17px;align-items:flex-start;margin-bottom:24px}
-.section-heading.second{margin-top:42px}
-.section-heading>span{font-size:11px;color:var(--accent);letter-spacing:.16em;padding-top:7px}
-.section-heading h2{font-size:34px;margin:0 0 3px}.section-heading p{margin:0;color:var(--soft);font-size:13px}
-label{display:block;color:#ddd9eb;font-size:13px;margin:18px 0 8px}
-label>span,label small{color:var(--accent);font-weight:400}
-input,textarea{
-  width:100%;border:1px solid var(--line);background:rgba(4,6,17,.6);color:var(--text);
-  border-radius:13px;padding:14px 15px;outline:none;transition:.2s
-}
-input:focus,textarea:focus{border-color:rgba(201,185,255,.7);box-shadow:0 0 0 3px rgba(201,185,255,.08)}
-textarea{min-height:230px;resize:vertical;line-height:1.65}
-.counter{text-align:right;color:var(--soft);font-size:11px;margin-top:6px}
-.checkbox-row{display:flex;gap:10px;align-items:flex-start;margin-top:28px;color:var(--muted);font-size:12px}
-.checkbox-row input{width:16px;height:16px;accent-color:#b7a3f1;margin:0}
-.submit-btn{width:100%;margin-top:20px}
-.form-note{font-size:11px;color:var(--soft);line-height:1.6;text-align:center;margin:17px auto 0;max-width:520px}
-.status{text-align:center;min-height:20px;font-size:13px;margin:12px 0 0}
-.status.error{color:var(--danger)}.status.success{color:#c8f4d7}
-.search-hero{text-align:center;padding:100px 0 48px}
-.search-hero>p:not(.eyebrow){color:var(--muted);margin:25px auto;max-width:520px}
-.search-box{display:flex;gap:10px;max-width:650px;margin:auto;padding:9px}
-.search-box input{border:0;background:transparent;box-shadow:none}.search-box button{
-  flex:0 0 auto;border:0;background:#eee6ff;color:#171329;border-radius:10px;padding:0 19px;font-weight:700
-}
-.results-meta{color:var(--muted);font-size:13px;margin:34px auto 14px;max-width:760px}
-.results{display:grid;gap:18px;max-width:760px;margin:auto}
-.card{
-  background:rgba(16,19,40,.86);border:1px solid var(--line);border-radius:22px;padding:25px;
-  box-shadow:0 16px 50px rgba(0,0,0,.2)
-}
-.card-top{display:flex;justify-content:space-between;gap:15px;align-items:start;margin-bottom:20px}
-.to{font-family:"Cormorant Garamond",serif;font-size:27px}.from{font-size:11px;color:var(--muted);text-align:right}
-.letter{white-space:pre-wrap;line-height:1.75;color:#eeeaf7;font-size:15px}
-.date{font-size:10px;color:var(--soft);margin-top:20px}
-.spotify{margin-top:20px;overflow:hidden;border-radius:12px}
-.spotify iframe{display:block;width:100%;height:152px;border:0}
-.empty{text-align:center;color:var(--soft);padding:55px 20px;border:1px dashed var(--line);border-radius:22px}
-footer{position:relative;z-index:2;display:flex;justify-content:center;gap:15px;color:#5e5d72;font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:25px 20px 40px}
-.toast{position:fixed;z-index:99;left:50%;bottom:24px;transform:translate(-50%,20px);opacity:0;pointer-events:none;background:#f1eaff;color:#171329;padding:12px 17px;border-radius:99px;font-size:12px;font-weight:600;transition:.25s;white-space:nowrap}
-.toast.show{opacity:1;transform:translate(-50%,0)}
-@media(max-width:650px){
-  .site-header{padding:15px 16px}.brand{font-size:11px}nav{gap:0}.nav-btn{font-size:12px;padding:8px}
-  main{padding:0 14px 60px}.hero{padding:78px 0 65px}.search-hero{padding:72px 0 35px}
-  h1{font-size:54px}.hero-copy{font-size:14px}
-  .letter-form{padding:24px 18px;border-radius:22px}.section-heading h2{font-size:30px}
-  .search-box{border-radius:17px;padding:6px}.search-box button{padding:0 13px;font-size:12px}
-  .card{padding:20px}.card-top{flex-direction:column;gap:4px}.from{text-align:left}
-}
-''',
-
-"config.example.js": r'''// Copy this file to "config.js" and paste your Supabase project's
-// public browser key here. NEVER put a Supabase service_role/secret key here.
-//
-// Supabase dashboard:
-// Project Settings → API
-//
-// The key used by this site is intentionally public. Your database is protected
-// by the Row Level Security policies in supabase.sql.
-
-window.STARLETTERS_CONFIG = {
-  SUPABASE_URL: "https://YOUR-PROJECT.supabase.co",
-  SUPABASE_PUBLISHABLE_KEY: "YOUR-PUBLISHABLE-KEY"
-};
-''',
-
-"config.js": r'''// PASTE YOUR SUPABASE VALUES HERE.
-// This file is safe to publish ONLY when you use the public/publishable key
-// and the RLS policies from supabase.sql. NEVER use service_role/secret keys.
-
-window.STARLETTERS_CONFIG = {
-  SUPABASE_URL: "PASTE_YOUR_SUPABASE_URL_HERE",
-  SUPABASE_PUBLISHABLE_KEY: "PASTE_YOUR_SUPABASE_PUBLISHABLE_KEY_HERE"
-};
-''',
-
-"app.js": r'''(() => {
-  "use strict";
-
-  const config = window.STARLETTERS_CONFIG || {};
-  const $ = (id) => document.getElementById(id);
-
-  if (!window.supabase) {
-    showFatal("Supabase library could not load. Check your internet connection.");
-    return;
-  }
-
-  if (!config.SUPABASE_URL || config.SUPABASE_URL.includes("PASTE_") ||
-      !config.SUPABASE_PUBLISHABLE_KEY || config.SUPABASE_PUBLISHABLE_KEY.includes("PASTE_")) {
-    showFatal("Open config.js and add your Supabase URL + publishable key first.");
-    return;
-  }
-
-  const db = window.supabase.createClient(
-    config.SUPABASE_URL,
-    config.SUPABASE_PUBLISHABLE_KEY
-  );
-
-  const homeView = $("homeView");
-  const searchView = $("searchView");
-  const navButtons = document.querySelectorAll(".nav-btn");
-  const letterForm = $("letterForm");
-  const searchForm = $("searchForm");
-  const message = $("message");
-  const messageCount = $("messageCount");
-  const formStatus = $("formStatus");
-  const results = $("results");
-  const resultsMeta = $("resultsMeta");
-
-  function showFatal(text) {
-    const el = document.createElement("div");
-    el.style.cssText = "position:fixed;inset:20px;z-index:999;background:#171329;color:#fff;padding:24px;border:1px solid #8d79c9;border-radius:18px;font:14px/1.6 sans-serif;height:max-content";
-    el.textContent = text;
-    document.body.appendChild(el);
-  }
-
-  function setView(view) {
-    const isSearch = view === "search";
-    homeView.classList.toggle("active", !isSearch);
-    searchView.classList.toggle("active", isSearch);
-    navButtons.forEach(btn => btn.classList.toggle("active", btn.dataset.view === view));
-    window.scrollTo({top: 0, behavior: "smooth"});
-  }
-
-  document.querySelectorAll("[data-view]").forEach(btn => {
-    btn.addEventListener("click", (e) => {
-      e.preventDefault();
-      setView(btn.dataset.view);
-    });
-  });
-
-  $("scrollToForm").addEventListener("click", () => {
-    $("letterFormWrap").scrollIntoView({behavior:"smooth", block:"start"});
-  });
-
-  message.addEventListener("input", () => {
-    messageCount.textContent = message.value.length;
-  });
-
-  function cleanText(value, max) {
-    return value.trim().replace(/\s+\n/g, "\n").slice(0, max);
-  }
-
-  function spotifyEmbedUrl(raw) {
-    if (!raw) return null;
-
-    let url;
-    try {
-      url = new URL(raw.trim());
-    } catch {
-      return null;
-    }
-
-    if (!["open.spotify.com", "spotify.com"].includes(url.hostname)) return null;
-
-    const parts = url.pathname.split("/").filter(Boolean);
-    if (parts.length < 2) return null;
-
-    const allowed = new Set(["track","album","playlist","artist","episode","show"]);
-    if (!allowed.has(parts[0])) return null;
-
-    // Only keep the content type + Spotify ID. This prevents arbitrary iframe URLs.
-    const id = parts[1].replace(/[^a-zA-Z0-9]/g, "");
-    if (!id) return null;
-
-    return `https://open.spotify.com/embed/${parts[0]}/${id}?utm_source=starletters`;
-  }
-
-  function escapeHtml(value) {
-    return value.replace(/[&<>"']/g, ch => ({
-      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
-    }[ch]));
-  }
-
-  function formatDate(value) {
-    const d = new Date(value);
-    return new Intl.DateTimeFormat(undefined, {
-      year:"numeric", month:"short", day:"numeric"
-    }).format(d);
-  }
-
-  function renderCard(row) {
-    const card = document.createElement("article");
-    card.className = "card";
-
-    const to = escapeHtml(row.to_name);
-    const from = row.from_name ? escapeHtml(row.from_name) : "Anonymous";
-    const letter = escapeHtml(row.message);
-    const spotify = row.spotify_url ? spotifyEmbedUrl(row.spotify_url) : null;
-
-    card.innerHTML = `
-      <div class="card-top">
-        <div class="to">To ${to}</div>
-        <div class="from">from ${from}</div>
-      </div>
-      <div class="letter">${letter}</div>
-      ${spotify ? `<div class="spotify"><iframe src="${spotify}" title="Spotify player" loading="lazy" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe></div>` : ""}
-      <div class="date">${formatDate(row.created_at)}</div>
-    `;
-    return card;
-  }
-
-  letterForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    formStatus.className = "status";
-    formStatus.textContent = "";
-
-    const toName = cleanText($("toName").value, 80);
-    const fromName = cleanText($("fromName").value, 80);
-    const msg = cleanText(message.value, 5000);
-    const spotifyRaw = cleanText($("spotifyUrl").value, 500);
-    const spotify = spotifyEmbedUrl(spotifyRaw);
-
-    if (!toName || !msg) return setStatus("Please fill in the recipient and your letter.", true);
-    if (spotifyRaw && !spotify) return setStatus("That doesn't look like a valid Spotify content link.", true);
-
-    const submitBtn = $("submitBtn");
-    submitBtn.disabled = true;
-    submitBtn.textContent = "Sending into the universe…";
-
-    const { error } = await db.from("letters").insert({
-      to_name: toName,
-      from_name: fromName || null,
-      message: msg,
-      spotify_url: spotifyRaw || null
-    });
-
-    submitBtn.disabled = false;
-    submitBtn.textContent = "Post this letter ✦";
-
-    if (error) {
-      console.error(error);
-      return setStatus(
-        error.message.includes("row-level security")
-          ? "Posting is blocked by your database policy. Run the complete supabase.sql setup."
-          : "Something went wrong while posting. Check your Supabase setup.",
-        true
-      );
-    }
-
-    letterForm.reset();
-    messageCount.textContent = "0";
-    setStatus("Your letter is out there. ✦", false);
-    showToast("Letter posted ✦");
-
-    setTimeout(() => {
-      $("searchName").value = toName;
-      setView("search");
-      searchFor(toName);
-    }, 700);
-  });
-
-  function setStatus(text, error) {
-    formStatus.textContent = text;
-    formStatus.className = "status " + (error ? "error" : "success");
-  }
-
-  searchForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const name = cleanText($("searchName").value, 80);
-    if (name) await searchFor(name);
-  });
-
-  async function searchFor(name) {
-    results.innerHTML = `<div class="empty">Looking among the stars…</div>`;
-    resultsMeta.textContent = "";
-
-    // Exact normalized-name search. "Luna" and "luna" return the same letters.
-    const { data, error } = await db
-      .from("letters")
-      .select("id,to_name,from_name,message,spotify_url,created_at")
-      .eq("recipient_key", name.toLowerCase())
-      .order("created_at", {ascending:false})
-      .limit(100);
-
-    if (error) {
-      console.error(error);
-      results.innerHTML = `<div class="empty">Couldn't search right now. Check your Supabase table/RLS setup.</div>`;
-      return;
-    }
-
-    resultsMeta.textContent = data.length
-      ? `${data.length} letter${data.length === 1 ? "" : "s"} written for “${name}”`
-      : `No public letters found for “${name}” yet.`;
-
-    results.innerHTML = "";
-    if (!data.length) {
-      results.innerHTML = `<div class="empty">Nothing here yet.<br>Maybe someone is still trying to find the words.</div>`;
-      return;
-    }
-
-    const fragment = document.createDocumentFragment();
-    data.forEach(row => fragment.appendChild(renderCard(row)));
-    results.appendChild(fragment);
-  }
-
-  function showToast(text) {
-    const toast = $("toast");
-    toast.textContent = text;
-    toast.classList.add("show");
-    clearTimeout(showToast.timer);
-    showToast.timer = setTimeout(() => toast.classList.remove("show"), 2800);
-  }
-})();
-''',
-
-"supabase.sql": r'''-- STARLETTERS DATABASE SETUP
--- Paste this whole file into Supabase Dashboard → SQL Editor → New query.
---
--- This setup intentionally uses anonymous/public posting.
--- IMPORTANT: RLS is what makes the public browser key safe.
--- Never put a Supabase service_role/secret key in config.js.
-
-create extension if not exists pgcrypto;
-
-create table if not exists public.letters (
-  id uuid primary key default gen_random_uuid(),
-  to_name text not null,
-  recipient_key text generated always as (lower(btrim(to_name))) stored,
-  from_name text,
-  message text not null,
-  spotify_url text,
-  created_at timestamptz not null default now(),
-
-  constraint letters_to_name_length
-    check (char_length(btrim(to_name)) between 1 and 80),
-
-  constraint letters_from_name_length
-    check (from_name is null or char_length(btrim(from_name)) <= 80),
-
-  constraint letters_message_length
-    check (char_length(btrim(message)) between 1 and 5000),
-
-  constraint letters_spotify_length
-    check (spotify_url is null or char_length(spotify_url) <= 500),
-
-  constraint letters_spotify_domain
-    check (
-      spotify_url is null
-      or spotify_url ~* '^https?://(open\.)?spotify\.com/'
-    )
-);
-
-create index if not exists letters_recipient_key_created_idx
-  on public.letters (recipient_key, created_at desc);
-
-alter table public.letters enable row level security;
-
--- Remove/recreate policies so this script is safe to run again.
-drop policy if exists "Anyone can read public letters" on public.letters;
-drop policy if exists "Anyone can post public letters" on public.letters;
-
-create policy "Anyone can read public letters"
-on public.letters
-for select
-to anon, authenticated
-using (true);
-
-create policy "Anyone can post public letters"
-on public.letters
-for insert
-to anon, authenticated
-with check (
-  char_length(btrim(to_name)) between 1 and 80
-  and char_length(btrim(message)) between 1 and 5000
-  and (from_name is null or char_length(btrim(from_name)) <= 80)
-  and (spotify_url is null or char_length(spotify_url) <= 500)
-  and (
-    spotify_url is null
-    or spotify_url ~* '^https?://(open\.)?spotify\.com/'
-  )
-);
-
--- The client only needs SELECT + INSERT.
--- Do NOT create public UPDATE/DELETE policies.
-revoke update, delete on public.letters from anon, authenticated;
-
-grant select, insert on public.letters to anon, authenticated;
-
--- Optional moderation table. Visitors can submit a report, but cannot read reports.
-create table if not exists public.letter_reports (
-  id uuid primary key default gen_random_uuid(),
-  letter_id uuid not null references public.letters(id) on delete cascade,
-  reason text not null,
-  created_at timestamptz not null default now(),
-  constraint report_reason_length check (char_length(btrim(reason)) between 1 and 500)
-);
-
-alter table public.letter_reports enable row level security;
-
-drop policy if exists "Anyone can report a letter" on public.letter_reports;
-
-create policy "Anyone can report a letter"
-on public.letter_reports
-for insert
-to anon, authenticated
-with check (
-  char_length(btrim(reason)) between 1 and 500
-);
-
-grant insert on public.letter_reports to anon, authenticated;
-
--- OPTIONAL: If your Supabase project has the newer Data API controls,
--- make sure public.letters and public.letter_reports are exposed to the
--- Data API. The exact dashboard labels can vary by Supabase version.
-''',
-
-"README.md": r'''# STARLETTERS ✦
-
-A public anonymous love-letter wall with Spotify embeds.
-
-## What this version does
-
-- Anyone can write a public letter without making an account.
-- `To:` is the searchable recipient name.
-- Searching a name shows all public letters posted for that normalized name.
-- Names are case-insensitive (`Luna` = `luna`).
-- Optional `From:` name.
-- Optional Spotify track/album/playlist/artist/episode/show embed.
-- Newest letters appear first.
-- Mobile-friendly astronomy/romantic UI.
-- Supabase Postgres stores the letters permanently.
-- Row Level Security allows public SELECT + INSERT only.
-- No service-role key is ever used in the browser.
-- Includes an optional reports table for future moderation.
-
-## 1. Create Supabase project
-
-Create a project at https://supabase.com/
-
-Then open:
-
-SQL Editor → New query
-
-Paste ALL of `supabase.sql` and run it.
-
-## 2. Get your public key
-
-Supabase Dashboard → Project Settings → API.
-
-Copy:
-- Project URL
-- Publishable key (or the public/anon key shown by your project)
-
-NEVER copy the `service_role` / secret key.
-
-Open `config.js` and replace the two placeholders.
-
-## 3. Test locally
-
-Because browsers can block some local file behavior, use a tiny local server instead of double-clicking index.html.
-
-If Python is installed:
-
-    python -m http.server 8000
-
-Then open:
-
-    http://localhost:8000
-
-## 4. Put it on GitHub Pages
-
-Put these files in your repository:
-
-- index.html
-- style.css
-- app.js
-- config.js
-- .nojekyll
-- supabase.sql (optional; database setup only)
-- config.example.js
-- README.md
-- .github/workflows/pages.yml
-
-GitHub → repository → Settings → Pages
-
-Choose GitHub Actions as the source.
-
-Push to `main`. The included workflow deploys the site.
-
-## 5. Important public-site warning
-
-This is intentionally an anonymous public posting site. That means strangers can post things.
-
-The database rules prevent public visitors from editing/deleting letters, but they do NOT magically stop spam, harassment, or malicious submissions.
-
-For a real public launch, add:
-- moderation/admin tooling,
-- CAPTCHA or Turnstile,
-- rate limiting,
-- a report button,
-- a clear community/privacy policy,
-- abuse monitoring.
-
-The included report table is a starting point, but there is deliberately no public way to delete someone else's letter.
-
-## Spotify
-
-The site accepts Spotify URLs and turns supported content into Spotify embeds. It does not accept arbitrary iframe HTML from users.
-
-Supported:
-- track
-- album
-- playlist
-- artist
-- episode
-- show
-
-Spotify embeds are provided by Spotify.
-
-## GitHub Pages
-
-GitHub Pages is only the static frontend. Supabase is the persistent backend/database.
-
-That split is intentional: GitHub Pages cannot itself act as your database.
-''',
-
-".nojekyll": "",
-".gitignore": r'''# Local Supabase config is intentionally not ignored because GitHub Pages
-# needs config.js to exist in the published site. It contains ONLY a public
-# Supabase browser key. NEVER put secrets/service_role keys in it.
-.DS_Store
-Thumbs.db
-''',
-
-".github/workflows/pages.yml": r'''name: Deploy Starletters to GitHub Pages
-
-on:
-  push:
-    branches: ["main"]
-  workflow_dispatch:
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: true
-
-jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
-      - name: Upload site
-        uses: actions/upload-pages-artifact@v4
-        with:
-          path: "."
-
-      - name: Deploy
-        id: deployment
-        uses: actions/deploy-pages@v4
-'''
-}
-
-for rel, content in files.items():
-    p = root / rel
-    p.parent.mkdir(parents=True, exist_ok=True)
-    p.write_text(content, encoding="utf-8")
-
-zip_path = Path("/mnt/data/starletters-github-pages.zip")
-with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as z:
-    for p in root.rglob("*"):
-        if p.is_file():
-            z.write(p, p.relative_to(root))
-
-print(f"Created project: {zip_path}")
-print("Files:")
-for p in sorted(root.rglob("*")):
-    if p.is_file():
-        print(" -", p.relative_to(root))
