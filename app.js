@@ -1051,14 +1051,6 @@
     const card =
       document.createElement("article");
 
-    const reportButton = card.querySelector(".report-letter");
-
-if (reportButton) {
-  reportButton.addEventListener("click", () => {
-    reportLetter(row.id);
-  });
-}
-
     card.className =
       "card";
 
