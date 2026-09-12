@@ -334,6 +334,9 @@ async function searchMusic() {
     }
   );
 
+console.log("MUSIC FUNCTION DATA:", data);
+console.log("MUSIC FUNCTION ERROR:", error);
+
 if (error) {
   throw error;
 }
