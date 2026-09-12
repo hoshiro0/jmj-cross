@@ -1160,16 +1160,48 @@
           </div>
 
           ${
-            preview
-              ? `
-                <audio
-                  controls
-                  preload="none"
-                  src="${escapeHtml(preview)}"
-                ></audio>
-              `
-              : ""
-          }
+  preview
+    ? `
+      <div class="star-player">
+
+        <audio
+          class="star-audio"
+          preload="metadata"
+          src="${escapeHtml(preview)}"
+        ></audio>
+
+        <button
+          class="star-play"
+          type="button"
+          aria-label="Play song"
+        >
+          ▶
+        </button>
+
+        <div class="star-player-main">
+
+          <div class="star-progress-row">
+            <input
+              class="star-progress"
+              type="range"
+              min="0"
+              max="100"
+              value="0"
+              step="0.1"
+              aria-label="Song progress"
+            >
+
+            <span class="star-time">
+              0:00 / 0:00
+            </span>
+          </div>
+
+        </div>
+
+      </div>
+    `
+    : ""
+}
 
         </div>
       `;
@@ -1248,6 +1280,126 @@
         Report
       </button>
     `;
+
+    const player = card.querySelector(".star-player");
+
+if (player) {
+  const audio =
+    player.querySelector(".star-audio");
+
+  const playButton =
+    player.querySelector(".star-play");
+
+  const progress =
+    player.querySelector(".star-progress");
+
+  const time =
+    player.querySelector(".star-time");
+
+  const formatPlayerTime = (seconds) => {
+    if (!Number.isFinite(seconds)) {
+      return "0:00";
+    }
+
+    const minutes =
+      Math.floor(seconds / 60);
+
+    const remaining =
+      Math.floor(seconds % 60)
+        .toString()
+        .padStart(2, "0");
+
+    return `${minutes}:${remaining}`;
+  };
+
+  const updatePlayer = () => {
+    const current =
+      audio.currentTime || 0;
+
+    const duration =
+      Number.isFinite(audio.duration)
+        ? audio.duration
+        : 0;
+
+    progress.value =
+      duration
+        ? (current / duration) * 100
+        : 0;
+
+    time.textContent =
+      `${formatPlayerTime(current)} / ${formatPlayerTime(duration)}`;
+  };
+
+  playButton.addEventListener(
+    "click",
+    async () => {
+      if (audio.paused) {
+        try {
+          await audio.play();
+
+          playButton.textContent = "❚❚";
+          playButton.setAttribute(
+            "aria-label",
+            "Pause song"
+          );
+        } catch (error) {
+          console.error(
+            "AUDIO PLAY ERROR:",
+            error
+          );
+        }
+      } else {
+        audio.pause();
+
+        playButton.textContent = "▶";
+        playButton.setAttribute(
+          "aria-label",
+          "Play song"
+        );
+      }
+    }
+  );
+
+  audio.addEventListener(
+    "loadedmetadata",
+    updatePlayer
+  );
+
+  audio.addEventListener(
+    "timeupdate",
+    updatePlayer
+  );
+
+  audio.addEventListener(
+    "ended",
+    () => {
+      playButton.textContent = "▶";
+
+      playButton.setAttribute(
+        "aria-label",
+        "Play song"
+      );
+
+      progress.value = 0;
+    }
+  );
+
+  progress.addEventListener(
+    "input",
+    () => {
+      if (
+        Number.isFinite(audio.duration) &&
+        audio.duration > 0
+      ) {
+        audio.currentTime =
+          (Number(progress.value) / 100) *
+          audio.duration;
+      }
+    }
+  );
+
+  updatePlayer();
+}
 
         const reportButton =
       card.querySelector(".report-letter");
