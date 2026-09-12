@@ -460,16 +460,20 @@
       "Searching…";
 
     musicStatus.textContent =
-      "Looking through the music library…";
+      "Connecting to music search…";
 
     musicResults.innerHTML = "";
 
 
+    const functionUrl =
+      `${config.SUPABASE_URL.replace(/\/+$/, "")}` +
+      `/functions/v1/search-music`;
+
+
     try {
 
-      const functionUrl =
-        `${config.SUPABASE_URL.replace(/\/+$/, "")}` +
-        `/functions/v1/search-music`;
+      musicStatus.textContent =
+        "Sending request to Supabase…";
 
 
       const controller =
@@ -486,6 +490,7 @@
 
       let response;
 
+
       try {
 
         response =
@@ -499,10 +504,7 @@
                   "application/json",
 
                 "apikey":
-                  config.SUPABASE_PUBLISHABLE_KEY,
-
-                "Authorization":
-                  `Bearer ${config.SUPABASE_PUBLISHABLE_KEY}`
+                  config.SUPABASE_PUBLISHABLE_KEY
               },
 
               body: JSON.stringify({
@@ -522,17 +524,32 @@
       }
 
 
-      let data = null;
+      musicStatus.textContent =
+        `Supabase responded: HTTP ${response.status}`;
+
+
+      const text =
+        await response.text();
+
+
+      console.log(
+        "MUSIC RAW RESPONSE:",
+        text
+      );
+
+
+      let data;
+
 
       try {
 
         data =
-          await response.json();
+          JSON.parse(text);
 
       } catch {
 
         throw new Error(
-          "The music service returned an invalid response."
+          `Supabase returned invalid JSON: ${text.slice(0, 200)}`
         );
 
       }
@@ -542,7 +559,7 @@
 
         throw new Error(
           data?.error ||
-          `Music search failed (${response.status}).`
+          `Music search failed with HTTP ${response.status}`
         );
 
       }
@@ -563,7 +580,7 @@
       if (!data.results.length) {
 
         musicStatus.textContent =
-          "No songs found. Try another search.";
+          "Connected successfully, but no songs were found.";
 
         musicResults.innerHTML = "";
 
@@ -573,11 +590,13 @@
 
 
       musicStatus.textContent =
-        `${data.results.length} results found.`;
+        `Connected! ${data.results.length} songs found.`;
+
 
       renderMusicResults(
         data.results
       );
+
 
     } catch (error) {
 
@@ -593,15 +612,15 @@
       ) {
 
         musicStatus.textContent =
-          "Music search timed out. Please try again.";
+          "Request timed out after 10 seconds. The browser could not reach the music function.";
 
       } else {
 
         musicStatus.textContent =
-          error?.message ||
-          "Couldn't search for music right now.";
+          `Music search error: ${error?.message || "Unknown error."}`;
 
       }
+
 
       musicResults.innerHTML = "";
 
@@ -942,10 +961,12 @@
           row.music_artwork
         );
 
+
       const musicLink =
         safeHttpsUrl(
           row.music_url
         );
+
 
       const preview =
         safeHttpsUrl(
@@ -1315,6 +1336,7 @@
           "Couldn't post your letter right now. Please try again.",
           true
         );
+
 
       } finally {
 
