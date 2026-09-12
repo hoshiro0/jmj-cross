@@ -79,9 +79,6 @@
   const musicUrl = $("musicUrl");
   const musicPreview = $("musicPreview");
 
-const musicFunctionUrl =
-  `${config.SUPABASE_URL}/functions/v1/search-music`;
-
 
   /* =========================
      FATAL ERROR
@@ -327,32 +324,29 @@ async function searchMusic() {
   musicResults.innerHTML = "";
 
   try {
-    const response = await fetch(
-      musicFunctionUrl,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          query: query.slice(0, 100)
-        })
+    const { data, error } =
+  await db.functions.invoke(
+    "search-music",
+    {
+      body: {
+        query: query.slice(0, 100)
       }
-    );
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(
-        data.error || "Music search failed."
-      );
     }
+  );
+
+if (error) {
+  throw error;
+}
 
     if (!data.results || !data.results.length) {
-      musicStatus.textContent =
-        "No songs found. Try another search.";
-      return;
-    }
+  musicStatus.textContent =
+    "No songs found. Try another search.";
+
+  musicSearchBtn.disabled = false;
+  musicSearchBtn.textContent = "Search";
+
+  return;
+}
 
     musicStatus.textContent =
       `${data.results.length} results found.`;
