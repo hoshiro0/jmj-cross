@@ -42,7 +42,7 @@
   ========================== */
 
   const db = window.supabase.createClient(
-    config.SUPABASE_URL,
+    config.SUPABASE_URL.replace(/\/+$/, ""),
     config.SUPABASE_PUBLISHABLE_KEY
   );
 
@@ -54,7 +54,8 @@
   const homeView = $("homeView");
   const searchView = $("searchView");
 
-  const navButtons = document.querySelectorAll(".nav-btn");
+  const navButtons =
+    document.querySelectorAll(".nav-btn");
 
   const letterForm = $("letterForm");
   const searchForm = $("searchForm");
@@ -86,7 +87,8 @@
 
   function showFatal(text) {
 
-    const el = document.createElement("div");
+    const el =
+      document.createElement("div");
 
     el.style.cssText =
       "position:fixed;" +
@@ -107,12 +109,78 @@
 
 
   /* =========================
+     TIMEOUT HELPER
+  ========================== */
+
+  function withTimeout(
+    promise,
+    milliseconds,
+    message
+  ) {
+
+    let timer;
+
+    const timeout =
+      new Promise((_, reject) => {
+
+        timer = setTimeout(() => {
+
+          reject(
+            new Error(message)
+          );
+
+        }, milliseconds);
+
+      });
+
+    return Promise.race([
+      promise,
+      timeout
+    ]).finally(() => {
+
+      clearTimeout(timer);
+
+    });
+  }
+
+
+  /* =========================
+     SAFE HTTPS URL
+  ========================== */
+
+  function safeHttpsUrl(value) {
+
+    if (!value) {
+      return "";
+    }
+
+    try {
+
+      const url =
+        new URL(String(value).trim());
+
+      if (url.protocol !== "https:") {
+        return "";
+      }
+
+      return url.href;
+
+    } catch {
+
+      return "";
+
+    }
+  }
+
+
+  /* =========================
      VIEW SWITCHING
   ========================== */
 
   function setView(view) {
 
-    const isSearch = view === "search";
+    const isSearch =
+      view === "search";
 
     homeView.classList.toggle(
       "active",
@@ -134,8 +202,8 @@
     });
 
     window.scrollTo({
-      top:0,
-      behavior:"smooth"
+      top: 0,
+      behavior: "smooth"
     });
   }
 
@@ -144,13 +212,18 @@
     .querySelectorAll("[data-view]")
     .forEach((btn) => {
 
-      btn.addEventListener("click", (e) => {
+      btn.addEventListener(
+        "click",
+        (e) => {
 
-        e.preventDefault();
+          e.preventDefault();
 
-        setView(btn.dataset.view);
+          setView(
+            btn.dataset.view
+          );
 
-      });
+        }
+      );
 
     });
 
@@ -159,41 +232,62 @@
      SCROLL TO FORM
   ========================== */
 
-  $("scrollToForm").addEventListener(
-    "click",
-    () => {
+  const scrollToForm =
+    $("scrollToForm");
 
-      $("letterFormWrap").scrollIntoView({
-        behavior:"smooth",
-        block:"start"
-      });
+  if (scrollToForm) {
 
-    }
-  );
+    scrollToForm.addEventListener(
+      "click",
+      () => {
+
+        const formWrap =
+          $("letterFormWrap");
+
+        if (formWrap) {
+
+          formWrap.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+          });
+
+        }
+
+      }
+    );
+
+  }
 
 
   /* =========================
      MESSAGE COUNTER
   ========================== */
 
-  message.addEventListener(
-    "input",
-    () => {
+  if (message && messageCount) {
 
-      messageCount.textContent =
-        message.value.length;
+    message.addEventListener(
+      "input",
+      () => {
 
-    }
-  );
+        messageCount.textContent =
+          message.value.length;
+
+      }
+    );
+
+  }
 
 
   /* =========================
      CLEAN TEXT
   ========================== */
 
-  function cleanText(value, max) {
+  function cleanText(
+    value,
+    max
+  ) {
 
-    return value
+    return String(value || "")
       .trim()
       .replace(/\s+\n/g, "\n")
       .slice(0, max);
@@ -215,7 +309,10 @@
 
     try {
 
-      url = new URL(raw.trim());
+      url =
+        new URL(
+          raw.trim()
+        );
 
     } catch {
 
@@ -247,14 +344,15 @@
     }
 
 
-    const allowed = new Set([
-      "track",
-      "album",
-      "playlist",
-      "artist",
-      "episode",
-      "show"
-    ]);
+    const allowed =
+      new Set([
+        "track",
+        "album",
+        "playlist",
+        "artist",
+        "episode",
+        "show"
+      ]);
 
 
     if (!allowed.has(parts[0])) {
@@ -264,7 +362,10 @@
 
     const id =
       parts[1]
-        .replace(/[^a-zA-Z0-9]/g, "");
+        .replace(
+          /[^a-zA-Z0-9]/g,
+          ""
+        );
 
 
     if (!id) {
@@ -276,6 +377,7 @@
       `https://open.spotify.com/embed/` +
       `${parts[0]}/${id}?utm_source=starletters`
     );
+
   }
 
 
@@ -285,14 +387,14 @@
 
   function escapeHtml(value) {
 
-    return String(value).replace(
+    return String(value || "").replace(
       /[&<>"']/g,
       (ch) => ({
-        "&":"&amp;",
-        "<":"&lt;",
-        ">":"&gt;",
-        '"':"&quot;",
-        "'":"&#039;"
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
       }[ch])
     );
 
@@ -303,99 +405,370 @@
      DATE
   ========================== */
 
-// =========================
-// MUSIC SEARCH
-// =========================
+  function formatDate(value) {
 
-async function searchMusic() {
-  const query = musicSearch.value.trim();
+    const d =
+      new Date(value);
 
-  if (!query) {
+    if (
+      Number.isNaN(
+        d.getTime()
+      )
+    ) {
+
+      return "";
+
+    }
+
+    return new Intl.DateTimeFormat(
+      undefined,
+      {
+        year: "numeric",
+        month: "short",
+        day: "numeric"
+      }
+    ).format(d);
+
+  }
+
+
+  /* =========================
+     MUSIC SEARCH
+  ========================== */
+
+  async function searchMusic() {
+
+    const query =
+      musicSearch.value.trim();
+
+
+    if (!query) {
+
+      musicStatus.textContent =
+        "Type a song or artist first.";
+
+      musicResults.innerHTML = "";
+
+      return;
+
+    }
+
+
+    musicSearchBtn.disabled = true;
+
+    musicSearchBtn.textContent =
+      "Searching…";
+
     musicStatus.textContent =
-      "Type a song or artist first.";
+      "Looking through the music library…";
+
     musicResults.innerHTML = "";
-    return;
+
+
+    try {
+
+      const functionUrl =
+        `${config.SUPABASE_URL.replace(/\/+$/, "")}` +
+        `/functions/v1/search-music`;
+
+
+      const controller =
+        new AbortController();
+
+
+      const timeout =
+        setTimeout(() => {
+
+          controller.abort();
+
+        }, 10000);
+
+
+      let response;
+
+      try {
+
+        response =
+          await fetch(
+            functionUrl,
+            {
+              method: "POST",
+
+              headers: {
+                "Content-Type":
+                  "application/json",
+
+                "apikey":
+                  config.SUPABASE_PUBLISHABLE_KEY,
+
+                "Authorization":
+                  `Bearer ${config.SUPABASE_PUBLISHABLE_KEY}`
+              },
+
+              body: JSON.stringify({
+                query:
+                  query.slice(0, 100)
+              }),
+
+              signal:
+                controller.signal
+            }
+          );
+
+      } finally {
+
+        clearTimeout(timeout);
+
+      }
+
+
+      let data = null;
+
+      try {
+
+        data =
+          await response.json();
+
+      } catch {
+
+        throw new Error(
+          "The music service returned an invalid response."
+        );
+
+      }
+
+
+      if (!response.ok) {
+
+        throw new Error(
+          data?.error ||
+          `Music search failed (${response.status}).`
+        );
+
+      }
+
+
+      if (
+        !data ||
+        !Array.isArray(data.results)
+      ) {
+
+        throw new Error(
+          "The music service returned an unexpected response."
+        );
+
+      }
+
+
+      if (!data.results.length) {
+
+        musicStatus.textContent =
+          "No songs found. Try another search.";
+
+        musicResults.innerHTML = "";
+
+        return;
+
+      }
+
+
+      musicStatus.textContent =
+        `${data.results.length} results found.`;
+
+      renderMusicResults(
+        data.results
+      );
+
+    } catch (error) {
+
+      console.error(
+        "MUSIC SEARCH ERROR:",
+        error
+      );
+
+
+      if (
+        error &&
+        error.name === "AbortError"
+      ) {
+
+        musicStatus.textContent =
+          "Music search timed out. Please try again.";
+
+      } else {
+
+        musicStatus.textContent =
+          error?.message ||
+          "Couldn't search for music right now.";
+
+      }
+
+      musicResults.innerHTML = "";
+
+    } finally {
+
+      musicSearchBtn.disabled = false;
+
+      musicSearchBtn.textContent =
+        "Search";
+
+    }
+
   }
 
-  musicSearchBtn.disabled = true;
-  musicSearchBtn.textContent = "Searching…";
-  musicStatus.textContent =
-    "Looking through the music library…";
-  musicResults.innerHTML = "";
 
-  try {
-    const response = await fetch(
-  `${config.SUPABASE_URL}/functions/v1/search-music`,
-  {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "apikey": config.SUPABASE_PUBLISHABLE_KEY,
-      "Authorization":
-        `Bearer ${config.SUPABASE_PUBLISHABLE_KEY}`
-    },
-    body: JSON.stringify({
-      query: query.slice(0, 100)
-    })
+  /* =========================
+     RENDER MUSIC RESULTS
+  ========================== */
+
+  function renderMusicResults(
+    tracks
+  ) {
+
+    musicResults.innerHTML = "";
+
+
+    tracks.forEach((track) => {
+
+      const item =
+        document.createElement("div");
+
+      item.className =
+        "music-result";
+
+
+      const artwork =
+        safeHttpsUrl(
+          track.artwork
+        );
+
+
+      item.innerHTML = `
+        ${
+          artwork
+            ? `
+              <img
+                class="music-artwork"
+                src="${escapeHtml(artwork)}"
+                alt=""
+                loading="lazy"
+              >
+            `
+            : `
+              <div class="music-artwork"></div>
+            `
+        }
+
+        <div class="music-info">
+
+          <div class="music-title">
+            ${escapeHtml(
+              track.title
+            )}
+          </div>
+
+          <div class="music-artist">
+            ${escapeHtml(
+              track.artist
+            )}
+          </div>
+
+          ${
+            track.album
+              ? `
+                <div class="music-album">
+                  ${escapeHtml(
+                    track.album
+                  )}
+                </div>
+              `
+              : ""
+          }
+
+        </div>
+
+        <button
+          class="music-select"
+          type="button"
+        >
+          Select
+        </button>
+      `;
+
+
+      const selectButton =
+        item.querySelector(
+          ".music-select"
+        );
+
+
+      if (selectButton) {
+
+        selectButton.addEventListener(
+          "click",
+          () => {
+
+            selectMusic(track);
+
+          }
+        );
+
+      }
+
+
+      musicResults.appendChild(
+        item
+      );
+
+    });
+
   }
-);
 
-const data = await response.json();
 
-if (!response.ok) {
-  throw new Error(
-    data.error || "Music search failed."
-  );
-}
+  /* =========================
+     SELECT MUSIC
+  ========================== */
 
-    if (!data.results || !data.results.length) {
-  musicStatus.textContent =
-    "No songs found. Try another search.";
+  function selectMusic(
+    track
+  ) {
 
-  musicSearchBtn.disabled = false;
-  musicSearchBtn.textContent = "Search";
+    musicTitle.value =
+      track.title || "";
 
-  return;
-}
+    musicArtist.value =
+      track.artist || "";
 
-    musicStatus.textContent =
-      `${data.results.length} results found.`;
-
-    renderMusicResults(data.results);
-
-  } catch (error) {
-    console.error(
-      "MUSIC SEARCH ERROR:",
-      error
-    );
-
-    musicStatus.textContent =
-      "Couldn't search for music right now.";
-  }
-
-  musicSearchBtn.disabled = false;
-  musicSearchBtn.textContent = "Search";
-}
-
-function renderMusicResults(tracks) {
-  musicResults.innerHTML = "";
-
-  tracks.forEach((track) => {
-
-    const item =
-      document.createElement("div");
-
-    item.className = "music-result";
-
-    item.innerHTML = `
-      ${
+    musicArtwork.value =
+      safeHttpsUrl(
         track.artwork
+      );
+
+    musicUrl.value =
+      safeHttpsUrl(
+        track.url
+      );
+
+    musicPreview.value =
+      safeHttpsUrl(
+        track.preview
+      );
+
+
+    const artwork =
+      safeHttpsUrl(
+        track.artwork
+      );
+
+
+    selectedMusic.innerHTML = `
+      ${
+        artwork
           ? `
             <img
               class="music-artwork"
-              src="${escapeHtml(track.artwork)}"
+              src="${escapeHtml(artwork)}"
               alt=""
-              loading="lazy"
             >
           `
           : `
@@ -403,159 +776,117 @@ function renderMusicResults(tracks) {
           `
       }
 
-      <div class="music-info">
+      <div class="selected-music-info">
+
+        <div class="selected-label">
+          Selected song
+        </div>
 
         <div class="music-title">
-          ${escapeHtml(track.title)}
+          ${escapeHtml(
+            track.title
+          )}
         </div>
 
         <div class="music-artist">
-          ${escapeHtml(track.artist)}
+          ${escapeHtml(
+            track.artist
+          )}
         </div>
-
-        ${
-          track.album
-            ? `
-              <div class="music-album">
-                ${escapeHtml(track.album)}
-              </div>
-            `
-            : ""
-        }
 
       </div>
 
       <button
-        class="music-select"
+        class="remove-music"
         type="button"
       >
-        Select
+        Remove
       </button>
     `;
 
-    item
-      .querySelector(".music-select")
-      .addEventListener(
-        "click",
-        () => selectMusic(track)
+
+    selectedMusic.classList.add(
+      "show"
+    );
+
+
+    musicResults.innerHTML = "";
+
+
+    musicStatus.textContent =
+      "Song selected. ✦";
+
+
+    const removeButton =
+      selectedMusic.querySelector(
+        ".remove-music"
       );
 
-    musicResults.appendChild(item);
-  });
-}
 
-function selectMusic(track) {
+    if (removeButton) {
 
-  musicTitle.value =
-    track.title || "";
+      removeButton.addEventListener(
+        "click",
+        clearSelectedMusic
+      );
 
-  musicArtist.value =
-    track.artist || "";
-
-  musicArtwork.value =
-    track.artwork || "";
-
-  musicUrl.value =
-    track.url || "";
-
-  musicPreview.value =
-    track.preview || "";
-
-  selectedMusic.innerHTML = `
-    ${
-      track.artwork
-        ? `
-          <img
-            class="music-artwork"
-            src="${escapeHtml(track.artwork)}"
-            alt=""
-          >
-        `
-        : `
-          <div class="music-artwork"></div>
-        `
     }
 
-    <div class="selected-music-info">
-
-      <div class="selected-label">
-        Selected song
-      </div>
-
-      <div class="music-title">
-        ${escapeHtml(track.title)}
-      </div>
-
-      <div class="music-artist">
-        ${escapeHtml(track.artist)}
-      </div>
-
-    </div>
-
-    <button
-      class="remove-music"
-      type="button"
-    >
-      Remove
-    </button>
-  `;
-
-  selectedMusic.classList.add("show");
-
-  musicResults.innerHTML = "";
-
-  musicStatus.textContent =
-    "Song selected. ✦";
-
-  selectedMusic
-    .querySelector(".remove-music")
-    .addEventListener(
-      "click",
-      clearSelectedMusic
-    );
-}
-
-function clearSelectedMusic() {
-
-  musicTitle.value = "";
-  musicArtist.value = "";
-  musicArtwork.value = "";
-  musicUrl.value = "";
-  musicPreview.value = "";
-
-  selectedMusic.innerHTML = "";
-  selectedMusic.classList.remove("show");
-
-  musicStatus.textContent = "";
-}
-
-musicSearchBtn.addEventListener(
-  "click",
-  searchMusic
-);
-
-musicSearch.addEventListener(
-  "keydown",
-  (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      searchMusic();
-    }
   }
-);
-  
-  function formatDate(value) {
 
-    const d = new Date(value);
 
-    return new Intl.DateTimeFormat(
-      undefined,
-      {
-        year:"numeric",
-        month:"short",
-        day:"numeric"
+  /* =========================
+     CLEAR SELECTED MUSIC
+  ========================== */
+
+  function clearSelectedMusic() {
+
+    musicTitle.value = "";
+    musicArtist.value = "";
+    musicArtwork.value = "";
+    musicUrl.value = "";
+    musicPreview.value = "";
+
+    selectedMusic.innerHTML = "";
+
+    selectedMusic.classList.remove(
+      "show"
+    );
+
+    musicStatus.textContent = "";
+
+  }
+
+
+  /* =========================
+     MUSIC EVENTS
+  ========================== */
+
+  if (
+    musicSearchBtn &&
+    musicSearch
+  ) {
+
+    musicSearchBtn.addEventListener(
+      "click",
+      searchMusic
+    );
+
+
+    musicSearch.addEventListener(
+      "keydown",
+      (e) => {
+
+        if (e.key === "Enter") {
+
+          e.preventDefault();
+
+          searchMusic();
+
+        }
+
       }
-    ).format(d);
+    );
 
   }
 
@@ -569,114 +900,167 @@ musicSearch.addEventListener(
     const card =
       document.createElement("article");
 
-    card.className = "card";
+    card.className =
+      "card";
 
 
     const to =
-      escapeHtml(row.to_name);
+      escapeHtml(
+        row.to_name
+      );
 
 
     const from =
       row.from_name
-        ? escapeHtml(row.from_name)
+        ? escapeHtml(
+            row.from_name
+          )
         : "Anonymous";
 
 
     const letter =
-      escapeHtml(row.message);
+      escapeHtml(
+        row.message
+      );
 
 
     let musicHtml = "";
 
-if (
-  row.music_title ||
-  row.music_artist ||
-  row.music_preview
-) {
-  musicHtml = `
-    <div class="card-music">
 
-      <div class="card-music-top">
+    /* =========================
+       DEEZER MUSIC
+    ========================== */
 
-        ${
+    if (
+      row.music_title ||
+      row.music_artist ||
+      row.music_preview
+    ) {
+
+      const artwork =
+        safeHttpsUrl(
           row.music_artwork
-            ? `
-              <img
-                class="card-music-artwork"
-                src="${escapeHtml(row.music_artwork)}"
-                alt=""
-                loading="lazy"
-              >
-            `
-            : ""
-        }
+        );
 
-        <div class="card-music-info">
+      const musicLink =
+        safeHttpsUrl(
+          row.music_url
+        );
 
-          <div class="card-music-title">
-            ${escapeHtml(
-              row.music_title || "Unknown song"
-            )}
+      const preview =
+        safeHttpsUrl(
+          row.music_preview
+        );
+
+
+      musicHtml = `
+        <div class="card-music">
+
+          <div class="card-music-top">
+
+            ${
+              artwork
+                ? `
+                  <img
+                    class="card-music-artwork"
+                    src="${escapeHtml(artwork)}"
+                    alt=""
+                    loading="lazy"
+                  >
+                `
+                : ""
+            }
+
+            <div class="card-music-info">
+
+              <div class="card-music-title">
+                ${escapeHtml(
+                  row.music_title ||
+                  "Unknown song"
+                )}
+              </div>
+
+              <div class="card-music-artist">
+                ${escapeHtml(
+                  row.music_artist ||
+                  "Unknown artist"
+                )}
+              </div>
+
+            </div>
+
+            ${
+              musicLink
+                ? `
+                  <a
+                    class="card-music-link"
+                    href="${escapeHtml(musicLink)}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Open ↗
+                  </a>
+                `
+                : ""
+            }
+
           </div>
 
-          <div class="card-music-artist">
-            ${escapeHtml(
-              row.music_artist || "Unknown artist"
-            )}
-          </div>
+          ${
+            preview
+              ? `
+                <audio
+                  controls
+                  preload="none"
+                  src="${escapeHtml(preview)}"
+                ></audio>
+              `
+              : ""
+          }
 
         </div>
+      `;
 
-        ${
-          row.music_url
-            ? `
-              <a
-                class="card-music-link"
-                href="${escapeHtml(row.music_url)}"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Open ↗
-              </a>
-            `
-            : ""
-        }
+    }
 
-      </div>
 
-      ${
-        row.music_preview
-          ? `
-            <audio
-              controls
-              preload="none"
-              src="${escapeHtml(row.music_preview)}"
-            ></audio>
-          `
-          : ""
+    /* =========================
+       OLD SPOTIFY MUSIC
+    ========================== */
+
+    else if (
+      row.spotify_url
+    ) {
+
+      const spotify =
+        spotifyEmbedUrl(
+          row.spotify_url
+        );
+
+
+      if (spotify) {
+
+        musicHtml = `
+          <div class="spotify">
+
+            <iframe
+              src="${spotify}"
+              title="Spotify player"
+              loading="lazy"
+              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+            ></iframe>
+
+          </div>
+        `;
+
       }
 
-    </div>
-  `;
-} else if (row.spotify_url) {
+    }
 
-  const spotify =
-    spotifyEmbedUrl(row.spotify_url);
 
-  if (spotify) {
-    musicHtml = `
-      <div class="spotify">
-        <iframe
-          src="${spotify}"
-          title="Spotify player"
-          loading="lazy"
-          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-        ></iframe>
-      </div>
-    `;
-  }
-}
-
+    /* =========================
+       CARD HTML
+    ========================== */
 
     card.innerHTML = `
       <div class="card-top">
@@ -698,12 +1082,15 @@ if (
       ${musicHtml}
 
       <div class="date">
-        ${formatDate(row.created_at)}
+        ${formatDate(
+          row.created_at
+        )}
       </div>
     `;
 
 
     return card;
+
   }
 
 
@@ -718,8 +1105,11 @@ if (
       e.preventDefault();
 
 
-      formStatus.className = "status";
-      formStatus.textContent = "";
+      formStatus.className =
+        "status";
+
+      formStatus.textContent =
+        "";
 
 
       const toName =
@@ -742,98 +1132,199 @@ if (
           5000
         );
 
-      if (!toName || !msg) {
-  return setStatus(
-    "Please fill in the recipient and your letter.",
-    true
-  );
-}
+
+      if (
+        !toName ||
+        !msg
+      ) {
+
+        return setStatus(
+          "Please fill in the recipient and your letter.",
+          true
+        );
+
+      }
 
 
       const submitBtn =
         $("submitBtn");
 
 
-      submitBtn.disabled = true;
+      submitBtn.disabled =
+        true;
 
       submitBtn.textContent =
         "Sending into the universe…";
 
-  const { error } = await db
-  .from("letters")
-  .insert({
-    to_name: toName,
-    from_name: fromName || null,
-    message: msg,
 
-    spotify_url: null,
+      try {
 
-    music_title:
-      musicTitle.value || null,
+        const musicData = {
+          music_title:
+            cleanText(
+              musicTitle.value,
+              200
+            ) || null,
 
-    music_artist:
-      musicArtist.value || null,
+          music_artist:
+            cleanText(
+              musicArtist.value,
+              200
+            ) || null,
 
-    music_artwork:
-      musicArtwork.value || null,
+          music_artwork:
+            safeHttpsUrl(
+              musicArtwork.value
+            ) || null,
 
-    music_url:
-      musicUrl.value || null,
+          music_url:
+            safeHttpsUrl(
+              musicUrl.value
+            ) || null,
 
-    music_preview:
-      musicPreview.value || null
-  });
-
-      submitBtn.disabled = false;
-
-      submitBtn.textContent =
-        "Post this letter ✦";
-
-
-      if (error) {
-
-  console.error("SUPABASE ERROR:", error);
-
-  return setStatus(
-    `Supabase error: ${error.message}`,
-    true
-  );
-
-}
-
-  letterForm.reset();
-
-messageCount.textContent = "0";
-
-clearSelectedMusic();
-
-musicResults.innerHTML = "";
-
-musicStatus.textContent = "";
-
-setStatus(
-  "Your letter is out there. ✦",
-  false
-);
-  
-      showToast(
-        "Letter posted ✦"
-      );
+          music_preview:
+            safeHttpsUrl(
+              musicPreview.value
+            ) || null
+        };
 
 
-      setTimeout(
-        () => {
+        const insertPromise =
+          db
+            .from("letters")
+            .insert({
+              to_name:
+                toName,
 
-          $("searchName").value =
-            toName;
+              from_name:
+                fromName ||
+                null,
 
-          setView("search");
+              message:
+                msg,
 
-          searchFor(toName);
+              spotify_url:
+                null,
 
-        },
-        700
-      );
+              music_title:
+                musicData.music_title,
+
+              music_artist:
+                musicData.music_artist,
+
+              music_artwork:
+                musicData.music_artwork,
+
+              music_url:
+                musicData.music_url,
+
+              music_preview:
+                musicData.music_preview
+            });
+
+
+        const result =
+          await withTimeout(
+            insertPromise,
+            10000,
+            "Posting the letter timed out. Please try again."
+          );
+
+
+        if (result.error) {
+
+          console.error(
+            "SUPABASE ERROR:",
+            result.error
+          );
+
+          throw new Error(
+            result.error.message ||
+            "Unable to post your letter."
+          );
+
+        }
+
+
+        letterForm.reset();
+
+
+        messageCount.textContent =
+          "0";
+
+
+        clearSelectedMusic();
+
+
+        musicResults.innerHTML = "";
+
+        musicStatus.textContent =
+          "";
+
+
+        setStatus(
+          "Your letter is out there. ✦",
+          false
+        );
+
+
+        showToast(
+          "Letter posted ✦"
+        );
+
+
+        setTimeout(
+          () => {
+
+            const searchName =
+              $("searchName");
+
+
+            if (searchName) {
+
+              searchName.value =
+                toName;
+
+            }
+
+
+            setView(
+              "search"
+            );
+
+
+            searchFor(
+              toName
+            );
+
+          },
+          700
+        );
+
+
+      } catch (error) {
+
+        console.error(
+          "POST LETTER ERROR:",
+          error
+        );
+
+
+        setStatus(
+          error?.message ||
+          "Couldn't post your letter right now. Please try again.",
+          true
+        );
+
+      } finally {
+
+        submitBtn.disabled =
+          false;
+
+        submitBtn.textContent =
+          "Post this letter ✦";
+
+      }
 
     }
   );
@@ -882,7 +1373,9 @@ setStatus(
 
       if (name) {
 
-        await searchFor(name);
+        await searchFor(
+          name
+        );
 
       }
 
@@ -894,7 +1387,9 @@ setStatus(
      SEARCH DATABASE
   ========================== */
 
-  async function searchFor(name) {
+  async function searchFor(
+    name
+  ) {
 
     results.innerHTML = `
       <div class="empty">
@@ -902,92 +1397,144 @@ setStatus(
       </div>
     `;
 
-    resultsMeta.textContent = "";
-
-
-    const {
-      data,
-      error
-    } = await db
-      .from("letters")
-      .select(
-        "id,to_name,from_name,message,spotify_url,created_at"
-      )
-      .eq(
-        "recipient_key",
-        name.toLowerCase()
-      )
-      .order(
-        "created_at",
-        {
-          ascending:false
-        }
-      )
-      .limit(100);
-
-
-    if (error) {
-
-      console.error(error);
-
-
-      results.innerHTML = `
-        <div class="empty">
-          Couldn't search right now.
-          Check your Supabase table/RLS setup.
-        </div>
-      `;
-
-      return;
-    }
-
 
     resultsMeta.textContent =
-      data.length
-
-        ? `${data.length} letter${
-            data.length === 1
-              ? ""
-              : "s"
-          } written for “${name}”`
-
-        : `No public letters found for “${name}” yet.`;
+      "";
 
 
-    results.innerHTML = "";
+    try {
+
+      const searchPromise =
+        db
+          .from("letters")
+          .select(
+            [
+              "id",
+              "to_name",
+              "from_name",
+              "message",
+              "spotify_url",
+              "created_at",
+              "music_title",
+              "music_artist",
+              "music_artwork",
+              "music_url",
+              "music_preview"
+            ].join(",")
+          )
+          .eq(
+            "recipient_key",
+            name.toLowerCase()
+          )
+          .order(
+            "created_at",
+            {
+              ascending: false
+            }
+          )
+          .limit(100);
 
 
-    if (!data.length) {
-
-      results.innerHTML = `
-        <div class="empty">
-          Nothing here yet.<br>
-          Maybe someone is still trying to find the words.
-        </div>
-      `;
-
-      return;
-    }
+      const result =
+        await withTimeout(
+          searchPromise,
+          10000,
+          "Search timed out. Please try again."
+        );
 
 
-    const fragment =
-      document.createDocumentFragment();
+      const data =
+        result.data;
+
+      const error =
+        result.error;
 
 
-    data.forEach(
-      (row) => {
+      if (error) {
 
-        fragment.appendChild(
-          renderCard(row)
+        console.error(
+          "SEARCH ERROR:",
+          error
+        );
+
+        throw new Error(
+          error.message ||
+          "Couldn't search right now."
         );
 
       }
-    );
 
 
-    results.appendChild(
-      fragment
-    );
+      resultsMeta.textContent =
+        data.length
+          ? `${data.length} letter${
+              data.length === 1
+                ? ""
+                : "s"
+            } written for “${name}”`
+          : `No public letters found for “${name}” yet.`;
+
+
+      results.innerHTML =
+        "";
+
+
+      if (!data.length) {
+
+        results.innerHTML = `
+          <div class="empty">
+            Nothing here yet.<br>
+            Maybe someone is still trying to find the words.
+          </div>
+        `;
+
+        return;
+
+      }
+
+
+      const fragment =
+        document.createDocumentFragment();
+
+
+      data.forEach(
+        (row) => {
+
+          fragment.appendChild(
+            renderCard(row)
+          );
+
+        }
+      );
+
+
+      results.appendChild(
+        fragment
+      );
+
+
+    } catch (error) {
+
+      console.error(
+        "SEARCH DATABASE ERROR:",
+        error
+      );
+
+
+      resultsMeta.textContent =
+        "";
+
+
+      results.innerHTML = `
+        <div class="empty">
+          ${
+            error?.message ||
+            "Couldn't search right now. Please try again."
+          }
+        </div>
+      `;
+
+    }
 
   }
 
@@ -996,10 +1543,17 @@ setStatus(
      TOAST
   ========================== */
 
-  function showToast(text) {
+  function showToast(
+    text
+  ) {
 
     const toast =
       $("toast");
+
+
+    if (!toast) {
+      return;
+    }
 
 
     toast.textContent =
