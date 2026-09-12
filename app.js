@@ -989,10 +989,75 @@
      RENDER LETTER
   ========================== */
 
+  async function reportLetter(letterId) {
+  const reason = window.prompt(
+    "Why are you reporting this letter?\n\n" +
+    "1 — Spam\n" +
+    "2 — Harassment\n" +
+    "3 — Inappropriate content\n" +
+    "4 — Personal/private information\n" +
+    "5 — Other\n\n" +
+    "Enter a number from 1 to 5."
+  );
+
+  if (reason === null) return;
+
+  const reasons = {
+    "1": "Spam",
+    "2": "Harassment",
+    "3": "Inappropriate content",
+    "4": "Personal/private information",
+    "5": "Other"
+  };
+
+  const selectedReason = reasons[reason.trim()];
+
+  if (!selectedReason) {
+    showToast("Please choose a number from 1 to 5.");
+    return;
+  }
+
+  try {
+    const result = await withTimeout(
+      db.from("reports").insert({
+        letter_id: letterId,
+        reason: selectedReason
+      }),
+      10000,
+      "Reporting timed out. Please try again."
+    );
+
+    if (result.error) {
+      console.error("REPORT ERROR:", result.error);
+      throw new Error(
+        result.error.message || "Couldn't submit the report."
+      );
+    }
+
+    showToast("Report submitted. Thank you.");
+
+  } catch (error) {
+    console.error("REPORT LETTER ERROR:", error);
+
+    showToast(
+      error?.message ||
+      "Couldn't submit the report right now."
+    );
+  }
+}
+
   function renderCard(row) {
 
     const card =
       document.createElement("article");
+
+    const reportButton = card.querySelector(".report-letter");
+
+if (reportButton) {
+  reportButton.addEventListener("click", () => {
+    reportLetter(row.id);
+  });
+}
 
     card.className =
       "card";
@@ -1175,15 +1240,34 @@
         ${letter}
       </div>
 
-      ${musicHtml}
+            ${musicHtml}
 
       <div class="date">
         ${formatDate(
           row.created_at
         )}
       </div>
+
+      <button
+        class="report-letter"
+        type="button"
+        data-letter-id="${escapeHtml(row.id)}"
+      >
+        Report
+      </button>
     `;
 
+        const reportButton =
+      card.querySelector(".report-letter");
+
+    if (reportButton) {
+      reportButton.addEventListener(
+        "click",
+        () => {
+          reportLetter(row.id);
+        }
+      );
+    }
 
     return card;
 
