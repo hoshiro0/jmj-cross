@@ -34,6 +34,43 @@
   href="assets/favicon.png"
 >
 
+  /* =========================
+   ASTRONOMY SORT BUTTON
+========================= */
+
+.sort-select,
+.sort-btn {
+  border: 1px solid rgba(201,185,255,.22) !important;
+  background: rgba(201,185,255,.07) !important;
+  color: #c9b9ff !important;
+  border-radius: 12px !important;
+  padding: 10px 13px !important;
+  font-family: inherit;
+  font-size: 13px !important;
+  cursor: pointer;
+  outline: none;
+  transition: .2s ease;
+}
+
+.sort-select:hover,
+.sort-btn:hover {
+  background: rgba(201,185,255,.13) !important;
+  border-color: rgba(201,185,255,.42) !important;
+  color: #f4f5ff !important;
+}
+
+.sort-select:focus,
+.sort-btn:focus {
+  border-color: rgba(201,185,255,.5) !important;
+  box-shadow: 0 0 0 3px rgba(201,185,255,.07);
+}
+
+/* If the sort control is a dropdown */
+.sort-select option {
+  background: #080b18;
+  color: #f4f5ff;
+}
+
   <style>
     * {
       box-sizing: border-box;
