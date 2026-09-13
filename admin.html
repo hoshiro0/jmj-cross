@@ -36,41 +36,68 @@
 
   <style>
 
-    /* =========================
-   ASTRONOMY SORT BUTTON
-========================= */
+    /* Astronomy-themed sort dropdown */
+.admin-select {
+  appearance: none !important;
+  -webkit-appearance: none !important;
 
-.sort-select,
-.sort-btn {
-  border: 1px solid rgba(201,185,255,.22) !important;
-  background: rgba(201,185,255,.07) !important;
-  color: #c9b9ff !important;
+  width: auto !important;
+  min-width: 150px;
+
+  padding: 10px 38px 10px 13px !important;
+
+  border: 1px solid rgba(201, 185, 255, 0.28) !important;
   border-radius: 12px !important;
-  padding: 10px 13px !important;
-  font-family: inherit;
+
+  background-color: #0b0f20 !important;
+  color: #c9b9ff !important;
+
+  font-family: inherit !important;
   font-size: 13px !important;
+  font-weight: 500;
+
   cursor: pointer;
   outline: none;
-  transition: .2s ease;
+
+  /* custom little arrow */
+  background-image:
+    linear-gradient(45deg, transparent 50%, #c9b9ff 50%),
+    linear-gradient(135deg, #c9b9ff 50%, transparent 50%) !important;
+  background-position:
+    calc(100% - 17px) 50%,
+    calc(100% - 12px) 50% !important;
+  background-size:
+    5px 5px,
+    5px 5px !important;
+  background-repeat: no-repeat !important;
+
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.18);
+  transition: 0.2s ease;
 }
 
-.sort-select:hover,
-.sort-btn:hover {
-  background: rgba(201,185,255,.13) !important;
-  border-color: rgba(201,185,255,.42) !important;
+.admin-select:hover {
+  background-color: #11162b !important;
+  border-color: rgba(201, 185, 255, 0.5) !important;
   color: #f4f5ff !important;
 }
 
-.sort-select:focus,
-.sort-btn:focus {
-  border-color: rgba(201,185,255,.5) !important;
-  box-shadow: 0 0 0 3px rgba(201,185,255,.07);
+.admin-select:focus {
+  border-color: rgba(201, 185, 255, 0.55) !important;
+  box-shadow: 0 0 0 3px rgba(201, 185, 255, 0.08);
 }
 
-/* If the sort control is a dropdown */
-.sort-select option {
-  background: #080b18;
-  color: #f4f5ff;
+/* Dropdown options */
+.admin-select option {
+  background: #0b0f20 !important;
+  color: #f4f5ff !important;
+}
+
+/* Keep it full-width on phones */
+@media (max-width: 650px) {
+  .admin-select {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
 }
     
     * {
