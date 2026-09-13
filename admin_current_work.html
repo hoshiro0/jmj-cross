@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Starletters — Owner</title>
+
+  <link
+  rel="icon"
+  type="image/png"
+  sizes="64x64"
+  href="./assets/favicon.png"
+>
+
+<link
+  rel="shortcut icon"
+  type="image/png"
+  href="./assets/favicon.png"
+>
+
+<link
+  rel="apple-touch-icon"
+  href="./assets/favicon.png"
+>
+
+  <link
+  rel="icon"
+  type="image/png"
+  href="assets/favicon.png"
+>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    .admin-logo {
+  display: block;
+  width: 230px;
+  height: auto;
+  margin-bottom: 12px;
+}
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      background: #080b18;
+      color: #f4f5ff;
+      padding: 24px;
+    }
+
+    .container {
+      width: min(900px, 100%);
+      margin: 0 auto;
+    }
+
+    h1 {
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      opacity: 0.7;
+      margin-bottom: 28px;
+    }
+
+    .panel {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 18px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    input {
+      width: 100%;
+      padding: 13px;
+      margin: 7px 0;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.07);
+      color: white;
+      outline: none;
+      font-size: 16px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 10px;
+      padding: 11px 16px;
+      cursor: pointer;
+      margin-top: 8px;
+      font-size: 16px;
+    }
+
+    .login-btn {
+      width: 100%;
+      background: #ffffff;
+      color: #111111;
+    }
+
+    .login-btn:active {
+      transform: scale(0.99);
+    }
+
+    .logout-btn {
+      float: right;
+    }
+
+    .letter {
+      background: rgba(255,255,255,0.05);
+      border-radius: 14px;
+      padding: 18px;
+      margin-top: 14px;
+    }
+
+    .letter-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 15px;
+      align-items: flex-start;
+    }
+
+    .recipient {
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .date {
+      opacity: 0.55;
+      font-size: 13px;
+    }
+
+    .message {
+      white-space: pre-wrap;
+      line-height: 1.6;
+      margin-top: 15px;
+    }
+
+    .from {
+      opacity: 0.7;
+      margin-top: 12px;
+      font-size: 14px;
+    }
+
+    .delete-btn {
+      background: #9d3030;
+      color: white;
+    }
+
+
+    .admin-tabs{display:flex;gap:8px;margin:18px 0 4px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,.1)}
+    .admin-tab{margin:0;background:transparent;color:rgba(244,245,255,.62);border:1px solid transparent;padding:9px 13px;font-size:14px}
+    .admin-tab.active{color:#f4f5ff;background:rgba(201,185,255,.09);border-color:rgba(201,185,255,.22)}
+    .reports-badge{display:inline-grid;place-items:center;min-width:19px;height:19px;margin-left:5px;padding:0 5px;border-radius:999px;background:rgba(201,185,255,.16);color:#c9b9ff;font-size:10px}
+    .report{background:rgba(255,255,255,.05);border-radius:14px;padding:18px;margin-top:14px;border:1px solid rgba(255,255,255,.06)}
+    .report-reason{display:inline-block;color:#ffd6d6;background:rgba(157,48,48,.16);border:1px solid rgba(255,150,150,.16);border-radius:999px;padding:5px 9px;font-size:11px;margin-top:10px}
+    .report-label{color:rgba(244,245,255,.52);font-size:11px;text-transform:uppercase;letter-spacing:.08em;margin-top:14px}
+    .report-preview{margin-top:7px;white-space:pre-wrap;line-height:1.5;overflow-wrap:anywhere;color:rgba(244,245,255,.86)}
+    .report-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+    .report-actions button{margin:0}
+    @media(max-width:650px){.admin-tabs{overflow-x:auto}.admin-tab{white-space:nowrap}.report{padding:14px}}
+
+
+    .admin-tools {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    .admin-search {
+      flex: 1;
+      min-width: 220px;
+      margin: 0;
+    }
+
+    .admin-select {
+      width: auto;
+      min-width: 130px;
+      margin: 0;
+      padding: 13px;
+    }
+
+    .page-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    .page-info {
+      opacity: .65;
+      font-size: 12px;
+    }
+
+    .page-buttons {
+      display: flex;
+      gap: 7px;
+    }
+
+    .page-btn {
+      margin: 0;
+      padding: 8px 11px;
+      background: rgba(201,185,255,.08);
+      color: #f4f5ff;
+      border: 1px solid rgba(201,185,255,.18);
+      font-size: 12px;
+    }
+
+    .page-btn:disabled {
+      opacity: .35;
+      cursor: not-allowed;
+    }
+
+    .clear-search {
+      margin: 0;
+      padding: 8px 11px;
+      background: transparent;
+      color: rgba(244,245,255,.62);
+      border: 1px solid rgba(255,255,255,.1);
+      font-size: 12px;
+    }
+
+    .admin-count {
+      opacity: .6;
+      font-size: 12px;
+      margin-top: 10px;
+    }
+
+    @media(max-width:650px){
+      .admin-tools { display: grid; grid-template-columns: 1fr; }
+      .admin-search, .admin-select, .clear-search { width: 100%; min-width: 0; }
+      .page-row { align-items: stretch; }
+      .page-buttons { width: 100%; }
+      .page-btn { flex: 1; }
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    #loginStatus {
+      margin-top: 12px;
+      color: #ffaaaa;
+    }
+
+    #status {
+      margin-top: 12px;
+      opacity: 0.75;
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="container">
+
+    <h1>
+  <img
+    src="assets/starletters-logo.png"
+    alt="Starletters"
+    class="admin-logo"
+  >
+  <span>Owner</span>
+</h1>
+
+    <p class="subtitle">
+      Private owner dashboard
+    </p>
+
+
+    <!-- LOGIN -->
+
+    <section
+      id="loginPanel"
+      class="panel"
+    >
+
+      <h2>Owner Login</h2>
+
+      <input
+        id="email"
+        type="email"
+        placeholder="Email"
+        autocomplete="email"
+      >
+
+      <input
+        id="password"
+        type="password"
+        placeholder="Password"
+        autocomplete="current-password"
+      >
+
+      <button
+        id="loginBtn"
+        type="button"
+        class="login-btn"
+      >
+        Log in
+      </button>
+
+      <div id="loginStatus"></div>
+
+    </section>
+
+
+    <!-- ADMIN -->
+
+    <section
+      id="adminPanel"
+      class="hidden"
+    >
+
+      <div class="panel">
+
+        <button
+          id="logoutBtn"
+          type="button"
+          class="logout-btn"
+        >
+          Log out
+        </button>
+
+        <h2>Owner Dashboard</h2>
+
+        <div class="admin-tabs">
+          <button id="lettersTabBtn" type="button" class="admin-tab active">Letters</button>
+          <button id="reportsTabBtn" type="button" class="admin-tab">Reports <span id="reportsBadge" class="reports-badge hidden">0</span></button>
+        </div>
+
+        <section id="lettersTab">
+          <div class="admin-tools">
+            <input
+              id="letterSearch"
+              class="admin-search"
+              type="search"
+              placeholder="Search recipient, sender, or message..."
+              autocomplete="off"
+            >
+            <select id="letterSort" class="admin-select">
+              <option value="newest">Newest first</option>
+              <option value="oldest">Oldest first</option>
+            </select>
+            <button id="clearLetterSearch" type="button" class="clear-search">Clear</button>
+          </div>
+          <div id="status">Loading...</div>
+          <div id="letters"></div>
+          <div id="letterPagination" class="page-row hidden">
+            <div id="letterPageInfo" class="page-info"></div>
+            <div class="page-buttons">
+              <button id="letterPrev" type="button" class="page-btn">← Previous</button>
+              <button id="letterNext" type="button" class="page-btn">Next →</button>
+            </div>
+          </div>
+        </section>
+
+        <section id="reportsTab" class="hidden">
+          <div class="admin-tools">
+            <input
+              id="reportSearch"
+              class="admin-search"
+              type="search"
+              placeholder="Search reports, recipient, sender, or message..."
+              autocomplete="off"
+            >
+            <button id="clearReportSearch" type="button" class="clear-search">Clear</button>
+          </div>
+          <div id="reportsStatus">Loading reports...</div>
+          <div id="reports"></div>
+          <div id="reportPagination" class="page-row hidden">
+            <div id="reportPageInfo" class="page-info"></div>
+            <div class="page-buttons">
+              <button id="reportPrev" type="button" class="page-btn">← Previous</button>
+              <button id="reportNext" type="button" class="page-btn">Next →</button>
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <!-- SUPABASE -->
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script src="config.js"></script>
+
+
+  <script>
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      async function () {
+
+        const loginPanel =
+          document.getElementById(
+            "loginPanel"
+          );
+
+        const adminPanel =
+          document.getElementById(
+            "adminPanel"
+          );
+
+        const loginBtn =
+          document.getElementById(
+            "loginBtn"
+          );
+
+        const logoutBtn =
+          document.getElementById(
+            "logoutBtn"
+          );
+
+        const email =
+          document.getElementById(
+            "email"
+          );
+
+        const password =
+          document.getElementById(
+            "password"
+          );
+
+        const loginStatus =
+          document.getElementById(
+            "loginStatus"
+          );
+
+        const letters =
+          document.getElementById(
+            "letters"
+          );
+
+        const status =
+          document.getElementById(
+            "status"
+          );
+
+
+        /* CHECK SUPABASE */
+
+        if (
+          !window.supabase ||
+          !window.STARLETTERS_CONFIG
+        ) {
+
+          loginStatus.textContent =
+            "Supabase could not load. Please refresh the page.";
+
+          return;
+
+        }
+
+
+        const config =
+          window.STARLETTERS_CONFIG;
+
+
+        if (
+          !config.SUPABASE_URL ||
+          !config.SUPABASE_PUBLISHABLE_KEY
+        ) {
+
+          loginStatus.textContent =
+            "Supabase configuration is missing.";
+
+          return;
+
+        }
+
+
+        const supabase =
+          window.supabase.createClient(
+            config.SUPABASE_URL,
+            config.SUPABASE_PUBLISHABLE_KEY
+          );
+
+
+        const reports = document.getElementById("reports");
+        const reportsStatus = document.getElementById("reportsStatus");
+        const lettersTabBtn = document.getElementById("lettersTabBtn");
+        const reportsTabBtn = document.getElementById("reportsTabBtn");
+        const lettersTab = document.getElementById("lettersTab");
+        const reportsTab = document.getElementById("reportsTab");
+        const reportsBadge = document.getElementById("reportsBadge");
+
+        const letterSearch = document.getElementById("letterSearch");
+        const letterSort = document.getElementById("letterSort");
+        const clearLetterSearch = document.getElementById("clearLetterSearch");
+        const letterPagination = document.getElementById("letterPagination");
+        const letterPageInfo = document.getElementById("letterPageInfo");
+        const letterPrev = document.getElementById("letterPrev");
+        const letterNext = document.getElementById("letterNext");
+
+        const reportSearch = document.getElementById("reportSearch");
+        const clearReportSearch = document.getElementById("clearReportSearch");
+        const reportPagination = document.getElementById("reportPagination");
+        const reportPageInfo = document.getElementById("reportPageInfo");
+        const reportPrev = document.getElementById("reportPrev");
+        const reportNext = document.getElementById("reportNext");
+
+        const PAGE_SIZE = 25;
+        let letterPage = 0;
+        let letterTotal = 0;
+        let reportPage = 0;
+        let reportTotal = 0;
+        let allReports = [];
+
+        function showTab(tab){
+          const showLetters = tab === "letters";
+          lettersTab.classList.toggle("hidden", !showLetters);
+          reportsTab.classList.toggle("hidden", showLetters);
+          lettersTabBtn.classList.toggle("active", showLetters);
+          reportsTabBtn.classList.toggle("active", !showLetters);
+          if(!showLetters) loadReports();
+        }
+        lettersTabBtn.addEventListener("click",()=>showTab("letters"));
+        reportsTabBtn.addEventListener("click",()=>showTab("reports"));
+
+        /* CHECK LOGIN */
+
+        async function checkOwner() {
+
+          const {
+            data,
+            error
+          } =
+            await supabase.auth.getUser();
+
+
+          if (
+            error ||
+            !data ||
+            !data.user
+          ) {
+
+            loginPanel.classList.remove(
+              "hidden"
+            );
+
+            adminPanel.classList.add(
+              "hidden"
+            );
+
+            return;
+
+          }
+
+
+          loginPanel.classList.add(
+            "hidden"
+          );
+
+          adminPanel.classList.remove(
+            "hidden"
+          );
+
+          await loadLetters();
+
+        }
+
+
+        /* LOGIN */
+
+        loginBtn.addEventListener(
+          "click",
+          async function () {
+
+            loginStatus.textContent =
+              "Logging in...";
+
+            loginBtn.disabled =
+              true;
+
+
+            const {
+              data,
+              error
+            } =
+              await supabase.auth
+                .signInWithPassword({
+
+                  email:
+                    email.value.trim(),
+
+                  password:
+                    password.value
+
+                });
+
+
+            loginBtn.disabled =
+              false;
+
+
+            if (error) {
+
+              loginStatus.textContent =
+                error.message;
+
+              return;
+
+            }
+
+
+            loginStatus.textContent =
+              "";
+
+            await checkOwner();
+
+          }
+        );
+
+
+        /* LOGOUT */
+
+        logoutBtn.addEventListener(
+          "click",
+          async function () {
+
+            await supabase.auth.signOut();
+
+            checkOwner();
+
+          }
+        );
+
+
+        /* LOAD LETTERS */
+
+        function cleanSearch(value) {
+          return String(value || "")
+            .trim()
+            .replace(/[%,]/g, " ")
+            .replace(/\s+/g, " ")
+            .slice(0, 80);
+        }
+
+        async function loadLetters() {
+          status.textContent = "Loading letters...";
+
+          const from = letterPage * PAGE_SIZE;
+          const to = from + PAGE_SIZE - 1;
+          const search = cleanSearch(letterSearch.value);
+          const ascending = letterSort.value === "oldest";
+
+          let query = supabase
+            .from("letters")
+            .select("*", { count: "exact" })
+            .order("created_at", { ascending });
+
+          if (search) {
+            query = query.or(
+              `to_name.ilike.%${search}%,from_name.ilike.%${search}%,message.ilike.%${search}%`
+            );
+          }
+
+          const { data, error, count } = await query.range(from, to);
+
+          if (error) {
+            status.textContent =
+              "Unable to load letters: " + error.message;
+            letterPagination.classList.add("hidden");
+            return;
+          }
+
+          letters.innerHTML = "";
+          letterTotal = count || 0;
+
+          if (!letterTotal) {
+            status.textContent = search
+              ? `No letters found for “${escapeHtml(search)}”.`
+              : "No letters yet.";
+            letterPagination.classList.add("hidden");
+            return;
+          }
+
+          const startNumber = from + 1;
+          const endNumber = Math.min(from + (data?.length || 0), letterTotal);
+          status.textContent = search
+            ? `Showing ${startNumber}–${endNumber} of ${letterTotal} matching letter(s)`
+            : `${letterTotal} letter(s)`;
+
+          (data || []).forEach(function (letter) {
+            const card = document.createElement("article");
+            card.className = "letter";
+
+            const date = letter.created_at
+              ? new Date(letter.created_at).toLocaleString()
+              : "";
+
+            const recipient = escapeHtml(letter.to_name);
+            const message = escapeHtml(letter.message);
+            const fromName = escapeHtml(letter.from_name);
+
+            card.innerHTML = `
+              <div class="letter-header">
+                <div>
+                  <div class="recipient">To: ${recipient}</div>
+                  <div class="date">${escapeHtml(date)}</div>
+                </div>
+                <button type="button" class="delete-btn">Delete</button>
+              </div>
+              <div class="message">${message}</div>
+              ${letter.from_name ? `<div class="from">From: ${fromName}</div>` : ""}
+            `;
+
+            const deleteBtn = card.querySelector(".delete-btn");
+            deleteBtn.addEventListener("click", function () {
+              deleteLetter(letter.id);
+            });
+
+            letters.appendChild(card);
+          });
+
+          const totalPages = Math.ceil(letterTotal / PAGE_SIZE);
+          letterPagination.classList.toggle("hidden", totalPages <= 1);
+          letterPageInfo.textContent = `Page ${letterPage + 1} of ${totalPages}`;
+          letterPrev.disabled = letterPage === 0;
+          letterNext.disabled = letterPage >= totalPages - 1;
+        }
+
+        let letterSearchTimer;
+        letterSearch.addEventListener("input", function () {
+          clearTimeout(letterSearchTimer);
+          letterSearchTimer = setTimeout(function () {
+            letterPage = 0;
+            loadLetters();
+          }, 300);
+        });
+
+        letterSort.addEventListener("change", function () {
+          letterPage = 0;
+          loadLetters();
+        });
+
+        clearLetterSearch.addEventListener("click", function () {
+          letterSearch.value = "";
+          letterPage = 0;
+          loadLetters();
+          letterSearch.focus();
+        });
+
+        letterPrev.addEventListener("click", function () {
+          if (letterPage > 0) {
+            letterPage -= 1;
+            loadLetters();
+          }
+        });
+
+        letterNext.addEventListener("click", function () {
+          if ((letterPage + 1) * PAGE_SIZE < letterTotal) {
+            letterPage += 1;
+            loadLetters();
+          }
+        });
+
+        /* DELETE */
+
+        async function deleteLetter(
+          id
+        ) {
+
+          const confirmed =
+            window.confirm(
+              "Delete this letter permanently?"
+            );
+
+
+          if (!confirmed) {
+            return;
+          }
+
+
+          const {
+            error
+          } =
+            await supabase
+              .from("letters")
+              .delete()
+              .eq(
+                "id",
+                id
+              );
+
+
+          if (error) {
+
+            window.alert(
+              "Delete failed: " +
+              error.message
+            );
+
+            return;
+
+          }
+
+
+          if (letterPage > 0 && (letterPage * PAGE_SIZE) >= Math.max(letterTotal - 1, 0)) {
+            letterPage -= 1;
+          }
+
+          await loadLetters();
+
+        }
+
+
+        /* REPORTS */
+
+        async function loadReports() {
+          reportsStatus.textContent = "Loading reports...";
+
+          const { data, error } = await supabase
+            .from("reports")
+            .select(
+              `id,letter_id,reason,created_at,letters(to_name,from_name,message,created_at)`
+            )
+            .order("created_at", { ascending: false });
+
+          if (error) {
+            reports.innerHTML = "";
+            reportsStatus.textContent =
+              "Unable to load reports: " + error.message;
+            reportsBadge.classList.add("hidden");
+            reportPagination.classList.add("hidden");
+            return;
+          }
+
+          allReports = data || [];
+          reportTotal = allReports.length;
+          reportsBadge.textContent = reportTotal;
+          reportsBadge.classList.toggle("hidden", reportTotal === 0);
+
+          renderReports();
+        }
+
+        function renderReports() {
+          reports.innerHTML = "";
+
+          const search = cleanSearch(reportSearch.value).toLowerCase();
+          const filtered = search
+            ? allReports.filter(function (report) {
+                const letter = report.letters || {};
+                const haystack = [
+                  report.reason,
+                  letter.to_name,
+                  letter.from_name,
+                  letter.message
+                ]
+                  .filter(Boolean)
+                  .join(" ")
+                  .toLowerCase();
+
+                return haystack.includes(search);
+              })
+            : allReports;
+
+          const total = filtered.length;
+
+          if (!total) {
+            reportsStatus.textContent = search
+              ? `No reports found for “${escapeHtml(search)}”.`
+              : "No reports yet.";
+            reportPagination.classList.add("hidden");
+            return;
+          }
+
+          const totalPages = Math.ceil(total / PAGE_SIZE);
+          if (reportPage >= totalPages) reportPage = Math.max(totalPages - 1, 0);
+
+          const start = reportPage * PAGE_SIZE;
+          const pageItems = filtered.slice(start, start + PAGE_SIZE);
+          const startNumber = start + 1;
+          const endNumber = start + pageItems.length;
+
+          reportsStatus.textContent = search
+            ? `Showing ${startNumber}–${endNumber} of ${total} matching report(s)`
+            : `${total} report(s)`;
+
+          pageItems.forEach(function (report) {
+            const card = document.createElement("article");
+            card.className = "report";
+            const letter = report.letters;
+            const date = report.created_at
+              ? new Date(report.created_at).toLocaleString()
+              : "";
+
+            card.innerHTML = `
+              <div class="recipient">To: ${escapeHtml(letter?.to_name || "Deleted letter")}</div>
+              <div class="date">Reported ${escapeHtml(date)}</div>
+              <div class="report-reason">${escapeHtml(report.reason || "No reason provided")}</div>
+              <div class="report-label">Letter</div>
+              <div class="report-preview">${escapeHtml(letter?.message || "This letter is no longer available.")}</div>
+              <div class="from">From: ${escapeHtml(letter?.from_name || "Anonymous")}</div>
+              ${letter ? `<div class="report-actions"><button type="button" class="delete-btn report-delete">Delete Letter</button></div>` : ""}
+            `;
+
+            const btn = card.querySelector(".report-delete");
+            if (btn) {
+              btn.addEventListener("click", function () {
+                deleteReportedLetter(report.letter_id);
+              });
+            }
+
+            reports.appendChild(card);
+          });
+
+          reportPagination.classList.toggle("hidden", totalPages <= 1);
+          reportPageInfo.textContent = `Page ${reportPage + 1} of ${totalPages}`;
+          reportPrev.disabled = reportPage === 0;
+          reportNext.disabled = reportPage >= totalPages - 1;
+        }
+
+        let reportSearchTimer;
+        reportSearch.addEventListener("input", function () {
+          clearTimeout(reportSearchTimer);
+          reportSearchTimer = setTimeout(function () {
+            reportPage = 0;
+            renderReports();
+          }, 300);
+        });
+
+        clearReportSearch.addEventListener("click", function () {
+          reportSearch.value = "";
+          reportPage = 0;
+          renderReports();
+          reportSearch.focus();
+        });
+
+        reportPrev.addEventListener("click", function () {
+          if (reportPage > 0) {
+            reportPage -= 1;
+            renderReports();
+          }
+        });
+
+        reportNext.addEventListener("click", function () {
+          if ((reportPage + 1) * PAGE_SIZE < reportTotal) {
+            reportPage += 1;
+            renderReports();
+          }
+        });
+
+        async function deleteReportedLetter(id) {
+          if (!window.confirm("Delete this reported letter permanently?")) return;
+
+          const { error } = await supabase
+            .from("letters")
+            .delete()
+            .eq("id", id);
+
+          if (error) {
+            window.alert("Delete failed: " + error.message);
+            return;
+          }
+
+          await loadLetters();
+          await loadReports();
+        }
+
+        /* ESCAPE HTML */
+
+        function escapeHtml(
+          value
+        ) {
+
+          return String(
+            value ?? ""
+          )
+            .replace(
+              /&/g,
+              "&amp;"
+            )
+            .replace(
+              /</g,
+              "&lt;"
+            )
+            .replace(
+              />/g,
+              "&gt;"
+            )
+            .replace(
+              /"/g,
+              "&quot;"
+            )
+            .replace(
+              /'/g,
+              "&#039;"
+            );
+
+        }
+
+
+        /* AUTH CHANGES */
+
+        supabase.auth.onAuthStateChange(
+          function () {
+            checkOwner();
+          }
+        );
+
+
+        /* START */
+
+        await checkOwner();
+
+      }
+    );
+
+  </script>
+
+</body>
+</html>
